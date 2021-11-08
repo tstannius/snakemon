@@ -40,8 +40,10 @@ async def service_info():
 
 
 @app.get("/create_workflow", status_code=status.HTTP_200_OK)
-async def create_workflow():
-    return {"id": str(uuid.uuid4())}
+async def create_workflow(workflow: str, name:str):
+    print(f"Creating workflow {workflow} with name {name}")
+    wid = str(uuid.uuid4())
+    return {"id": "whatever"}
 
 
 @app.post("/update_workflow_status", status_code=status.HTTP_200_OK)
