@@ -36,7 +36,7 @@ class Workflow(Base):
 
     id = Column(Integer, primary_key=True)
     workflow = Column(String(50), unique=False)
-    workflow_id = Column(String(50), unique=True)
+    # workflow_id = Column(String(50), unique=True)
     name = Column(String(50), unique=False)
     status = Column(String(30), unique=False)
     done = Column(Integer, unique=False)

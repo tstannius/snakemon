@@ -1,10 +1,30 @@
 import uuid
-from fastapi import FastAPI, Request, status
+from fastapi import Depends, FastAPI, HTTPException, Request, status
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
+from sqlalchemy.orm import Session
 from pprint import pprint
 # from fastapi.middleware.cors import CORSMiddleware
 
+#-----------------------------------------------------------------------------#
+# db setup
+#-----------------------------------------------------------------------------#
+from db import crud, models, schemas
+from db.database import engine, SessionLocal
+
+# db dependency - TODO: put elsewhere
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+models.Base.metadata.create_all(bind=engine)
+
+#-----------------------------------------------------------------------------#
+# api setup
+#-----------------------------------------------------------------------------#
 app = FastAPI()
 
 # origin: null - "... your server must read the value of the request's Origin 
@@ -40,10 +60,10 @@ async def service_info():
 
 
 @app.get("/create_workflow", status_code=status.HTTP_200_OK)
-async def create_workflow(workflow: str, name:str):
-    print(f"Creating workflow {workflow} with name {name}")
-    wid = str(uuid.uuid4())
-    return {"id": "whatever"}
+async def create_workflow(workflow: str, name: str, db: Session = Depends(get_db)):
+    db_workflow = crud.create_workflow(db, workflow=schemas.WorkflowCreate(workflow=workflow, name=name))
+    print(f"Creating workflow {db_workflow.workflow} with name {db_workflow.name}")
+    return {"id": db_workflow.id}
 
 
 @app.post("/update_workflow_status", status_code=status.HTTP_200_OK)
@@ -51,7 +71,6 @@ async def update_workflow_status(req: Request):
     da = await req.form()
     da = jsonable_encoder(da)
     pprint(da)
-
 
 
 @app.get("/")

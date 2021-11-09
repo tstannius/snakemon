@@ -44,10 +44,15 @@ from pydantic import BaseModel
 #         orm_mode = True
 
 class WorkflowBase(BaseModel):
-    id: int
-    workflow: str
-    workflow_id: str
-    name: str
+    workflow: str    # workflow type
+    # workflow_id: str # hash
+    name: str        # name of run
+
+class WorkflowCreate(WorkflowBase):
+    pass
+
+class Workflow(WorkflowBase):
+    id: int          # primary key
     status: str
     done: int
     total: int
