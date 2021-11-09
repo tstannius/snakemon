@@ -6,8 +6,10 @@ __pycache__
 
 # snakemake
 .snakemake
+logs/
 out/
 tmp/
+*.log
 
 # sqlite
 *.db
