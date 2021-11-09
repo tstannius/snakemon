@@ -10,46 +10,14 @@ from datetime import datetime
 from pydantic import BaseModel
 
 
-# class ItemBase(BaseModel):
-#     title: str
-#     description: Optional[str] = None
-
-
-# class ItemCreate(ItemBase):
-#     pass
-
-
-# class Item(ItemBase):
-#     id: int
-#     owner_id: int
-
-#     class Config:
-#         orm_mode = True
-
-
-# class UserBase(BaseModel):
-#     email: str
-
-
-# class UserCreate(UserBase):
-#     password: str
-
-
-# class User(UserBase):
-#     id: int
-#     is_active: bool
-#     items: List[Item] = []
-
-#     class Config:
-#         orm_mode = True
-
 class WorkflowBase(BaseModel):
     workflow: str    # workflow type
-    # workflow_id: str # hash
     name: str        # name of run
+
 
 class WorkflowCreate(WorkflowBase):
     pass
+
 
 class Workflow(WorkflowBase):
     id: int          # primary key
