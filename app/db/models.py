@@ -2,17 +2,26 @@
 
 These models define the database tables
 """
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String
-from sqlalchemy.orm import relationship
-
 from datetime import datetime
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String
+from sqlalchemy.ext.declarative import as_declarative, declared_attr
+from sqlalchemy.orm import relationship
+from typing import Any
 
-from .database import Base
+
+@as_declarative()
+class Base:
+    id: Any
+    __name__: str
+    # Generate __tablename__ automatically
+    @declared_attr
+    def __tablename__(cls) -> str:
+        # TODO: consider making django-like table name
+        # Alembic and FastAPI will still know what to do
+        return cls.__name__.lower()
 
 
 class Workflow(Base):
-    __tablename__ = 'workflows'
-
     id = Column(Integer, primary_key=True)
     workflow = Column(String(50), unique=False)
     name = Column(String(50), unique=False)

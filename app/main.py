@@ -18,7 +18,7 @@ def get_db():
     finally:
         db.close()
 
-models.Base.metadata.create_all(bind=engine)
+# models.Base.metadata.create_all(bind=engine)
 
 #-----------------------------------------------------------------------------#
 # api setup
