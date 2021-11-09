@@ -32,7 +32,7 @@ async def service_info():
 
 
 @app.get("/create_workflow", status_code=status.HTTP_200_OK)
-async def create_workflow(workflow: str, name: str, db: Session = Depends(get_db)):
+def create_workflow(workflow: str, name: str, db: Session = Depends(get_db)):
     db_workflow = crud.create_workflow(db, workflow=schemas.WorkflowCreate(workflow=workflow, name=name))
     print(f"Creating workflow {db_workflow.workflow} with name {db_workflow.name}")
     return {"id": db_workflow.id}
