@@ -25,6 +25,8 @@ alembic upgrade head
 
 ##### Initialize database
 ```
+# ensure versions dir exists
+mkdir -p alembic/versions
 # remove any existing database and migrations
 rm -f app/snakemon.db; rm -f alembic/versions/*.py
 
