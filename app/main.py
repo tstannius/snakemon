@@ -32,17 +32,22 @@ async def service_info():
 
 
 @app.get("/create_workflow", status_code=status.HTTP_200_OK)
-def create_workflow(workflow: str, name: str, db: Session = Depends(get_db)):
+async def create_workflow(workflow: str, name: str, request: Request, db: Session = Depends(get_db)):
+    data = await request.form() # TODO: use metadata
+    data = jsonable_encoder(data)
+    print(data)
     db_workflow = crud.create_workflow(db, workflow=schemas.WorkflowCreate(workflow=workflow, name=name))
     print(f"Creating workflow {db_workflow.workflow} with name {db_workflow.name}")
     return {"id": db_workflow.id}
 
 
 @app.post("/update_workflow_status", status_code=status.HTTP_200_OK)
-async def update_workflow_status(req: Request):
-    da = await req.form()
-    da = jsonable_encoder(da)
-    pprint(da)
+async def update_workflow_status(request: Request, db: Session = Depends(get_db)):
+    data = await request.form()
+    data = jsonable_encoder(data)
+    # db_workflow = crud.update_workflow(db, workflow=schemas.WorkflowUpdate(**da))
+    print(data)
+    # return {"id": db_workflow.id}
 
 
 @app.get("/")
