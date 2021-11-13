@@ -5,21 +5,21 @@ rule touch_dep1:
     output:
         "tmp/dep1.txt"
     run:
-        time.sleep(5)
+        time.sleep(1)
         Path(output[0]).touch()
 
 rule touch_dep2:
     output:
         "tmp/dep2.txt"
     run:
-        time.sleep(10)
+        time.sleep(1)
         Path(output[0]).touch()
 
 rule touch_dep3:
     output:
         "tmp/dep3.txt"
     run:
-        time.sleep(5)
+        time.sleep(1)
         Path(output[0]).touch()
 
 rule aggregate_deps_ok:
@@ -30,7 +30,7 @@ rule aggregate_deps_ok:
     output:
         "out/result_ok.txt"
     run:
-        time.sleep(3)
+        time.sleep(1)
         Path(output[0]).touch()
 
 rule aggregate_deps_and_fail:
@@ -43,7 +43,7 @@ rule aggregate_deps_and_fail:
     log:
         "logs/aggregate_deps_and_fail.log"
     run:
-        time.sleep(3)
+        time.sleep(1)
         assert(False), "This rule will fail"
         Path(output[0]).touch()
 
@@ -55,7 +55,7 @@ rule aggregate_deps_and_missing_output:
     output:
         "out/result_missing.txt"
     run:
-        time.sleep(3)
+        time.sleep(1)
 
 rule all_w_missing:
     input:
