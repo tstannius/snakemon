@@ -30,6 +30,7 @@ class Workflow(Base):
     total = Column(Integer, unique=False)
     started_at = Column(DateTime)
     completed_at = Column(DateTime)
+    last_update_at = Column(String(30)) # TODO: use proper DateTime
 
     def __init__(self, workflow, name, status=None):
         self.workflow = workflow

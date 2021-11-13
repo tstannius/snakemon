@@ -39,7 +39,7 @@ class Workflow(WorkflowCreate):
     total: int
     started_at: datetime
     completed_at: datetime
-    last_update_at: datetime
+    last_update_at: str # TODO: use proper DateTime
 
     class Config:
         orm_mode = True
