@@ -1,8 +1,10 @@
 """CRUD utils - Create, Read, Update, Delete
 """
 from sqlalchemy.orm import Session
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.encoders import jsonable_encoder
+from typing import Optional
 from . import models, schemas
 
 
@@ -15,18 +17,15 @@ async def create_workflow(session: AsyncSession, workflow: schemas.WorkflowCreat
 
 async def update_workflow(session: AsyncSession, workflow: schemas.WorkflowUpdate) -> models.Workflow:
     obj_in = workflow
-    db_obj = obj_in
-    # db_obj = db.query(models.Workflow).get(obj_in.id)
+    query = await session.execute(
+            select(models.Workflow).where(models.Workflow.id == obj_in.id)
+        )
+    db_obj: Optional[models.Workflow] = query.scalars().first()
     
-    # obj_data = jsonable_encoder(db_obj)
-    # if isinstance(obj_in, dict):
-    #     update_data = obj_in
-    # else:
-    #     update_data = obj_in.dict(exclude_unset=True)
-    # for field in obj_data:
-    #     if field in update_data:
-    #         setattr(db_obj, field, update_data[field])
-    # db.add(db_obj)
-    # db.commit()
-    # db.refresh(db_obj)
+    update_data = obj_in.dict(exclude_unset=True)
+    setattr(db_obj, "last_update_at", update_data["timestamp"]) # TODO rename to timestamp?
+    session.add(db_obj)
+    await session.commit()
+    await session.refresh(db_obj)
+    
     return db_obj

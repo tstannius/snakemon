@@ -37,8 +37,6 @@ async def create_workflow(
     
     data = await request.form() # TODO: use metadata
     data = jsonable_encoder(data)
-    print(data)
-    
     
     db_workflow = await crud.create_workflow(session, workflow=schemas.WorkflowCreate(workflow=workflow, name=name))
     print(f"Creating workflow {db_workflow.workflow} with name {db_workflow.name}")
@@ -50,11 +48,11 @@ async def update_workflow_status(
         request: Request,
         session: AsyncSession = Depends(get_session)
         ):
+    
     data = await request.form()
     data = jsonable_encoder(data)
-    # db_workflow = crud.update_workflow(db, workflow=schemas.WorkflowUpdate(**da))
-    print(data)
-    # return {"id": db_workflow.id}
+    db_workflow = await crud.update_workflow(session, workflow=schemas.WorkflowUpdate(**data))
+    return {"id": db_workflow.id}
 
 
 @app.get("/")
