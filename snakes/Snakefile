@@ -1,32 +1,34 @@
 import time
 from pathlib import Path
 
-rule touch_dep1:
+wildcard_constraints:
+    sample = r'|'.join(["1","2","3"])
+
+rule touch_no_wc:
     output:
-        "tmp/dep1.txt"
+        "tmp/dep-no_wc.txt"
     run:
         time.sleep(1)
         Path(output[0]).touch()
 
-rule touch_dep2:
+rule touch_dep_slow:
     output:
-        "tmp/dep2.txt"
+        "tmp/dep-slow-{sample}.txt"
     run:
-        time.sleep(1)
+        time.sleep(3)
         Path(output[0]).touch()
 
-rule touch_dep3:
+rule touch_dep_fast:
     output:
-        "tmp/dep3.txt"
+        "tmp/dep-fast-{sample}.txt"
     run:
         time.sleep(1)
         Path(output[0]).touch()
 
 rule aggregate_deps_ok:
     input:
-        "tmp/dep1.txt",
-        "tmp/dep2.txt",
-        "tmp/dep3.txt"
+        expand("tmp/dep-fast-{n}.txt", n=[1,2,3]),
+        "tmp/dep-no_wc.txt"
     output:
         "out/result_ok.txt"
     run:
@@ -35,9 +37,7 @@ rule aggregate_deps_ok:
 
 rule aggregate_deps_and_fail:
     input:
-        "tmp/dep1.txt",
-        "tmp/dep2.txt",
-        "tmp/dep3.txt"
+        expand("tmp/dep-fast-{n}.txt", n=[1,2,3])
     output:
         "out/result_fail.txt"
     log:
@@ -49,9 +49,7 @@ rule aggregate_deps_and_fail:
 
 rule aggregate_deps_and_missing_output:
     input:
-        "tmp/dep1.txt",
-        "tmp/dep2.txt",
-        "tmp/dep3.txt"
+        expand("tmp/dep-fast-{n}.txt", n=[1,2,3])
     output:
         "out/result_missing.txt"
     run:
