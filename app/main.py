@@ -34,10 +34,9 @@ async def create_workflow(
         request: Request,
         session: AsyncSession = Depends(get_session)
         ):
-    
-    data = await request.form() # TODO: use metadata
-    data = jsonable_encoder(data)
-    
+    # TODO: use forms properly, see: https://github.com/tiangolo/fastapi/issues/2387
+    # data = await request.form() # TODO: use metadata
+    # data = jsonable_encoder(data)
     db_workflow = await crud.create_workflow(session, workflow=schemas.WorkflowCreate(workflow=workflow, name=name))
     print(f"Creating workflow {db_workflow.workflow} with name {db_workflow.name}")
     return {"id": db_workflow.id}
@@ -45,13 +44,10 @@ async def create_workflow(
 
 @app.post("/update_workflow_status", status_code=status.HTTP_200_OK)
 async def update_workflow_status(
-        request: Request,
+        workflow: schemas.WorkflowUpdate = Depends(schemas.WorkflowUpdate.as_form),
         session: AsyncSession = Depends(get_session)
         ):
-    
-    data = await request.form()
-    data = jsonable_encoder(data)
-    db_workflow = await crud.update_workflow(session, workflow=schemas.WorkflowUpdate(**data))
+    db_workflow = await crud.update_workflow(session, workflow=workflow)
     return {"id": db_workflow.id}
 
 
