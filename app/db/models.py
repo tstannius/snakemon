@@ -32,10 +32,9 @@ class Workflow(Base):
     completed_at = Column(DateTime)
     last_update_at = Column(String(30)) # TODO: use proper DateTime
 
-    def __init__(self, workflow, name, status=None):
+    def __init__(self, workflow, name):
         self.workflow = workflow
         self.name = name
-        self.status = status
         self.done = 0
-        self.total = 1
+        self.total = 0
         self.started_at = datetime.now()
