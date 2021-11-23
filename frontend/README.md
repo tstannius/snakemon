@@ -1,4 +1,15 @@
-# Getting Started with Create React App
+# TODO
+1. Choose component framework, see. https://www.npmtrends.com/antd-vs-material-ui-vs-react-bootstrap-vs-reactstrap-vs-rsuite
+   1. Best choice seems to be plain css for as much as possible with react-bootstrap for some things
+   2. A component framework specifically for tables can be used, if necessary
+2. Add navbar and routing
+   1. Base on react-router tutorial: https://stackblitz.com/github/remix-run/react-router/tree/main/examples/basic?file=src%2FApp.tsx
+   2. Alternatives: base CSS and bootstrap https://stackoverflow.com/questions/50166035/how-to-implement-navbar-using-react
+   3. Other example: https://www.geeksforgeeks.org/create-a-responsive-navbar-using-reactjs/
+3. Add workflows view
+   1. Try react-bootstrap first
+   2. Example for how to get just some data and not all
+   3. Fancy table library, see https://react-table.tanstack.com/# Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
