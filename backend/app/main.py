@@ -1,6 +1,8 @@
 from fastapi import Depends, FastAPI, HTTPException, Request, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.middleware.cors import CORSMiddleware
+from typing import List
+from db import schemas
 from pprint import pprint
 
 #-----------------------------------------------------------------------------#
@@ -67,6 +69,13 @@ async def update_workflow_status(
         ):
     db_workflow = await crud.update_workflow(session, workflow=workflow)
     return {"id": db_workflow.id}
+
+
+@app.get("/workflows", response_model=List[schemas.Workflow])
+async def get_workflows(session: AsyncSession = Depends(get_session)):
+    # TODO: add query params to path operation
+    workflows = await crud.read_workflow_multi(session)
+    return workflows
 
 
 @app.get("/")

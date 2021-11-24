@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session # type: ignore
 from sqlalchemy import select # type: ignore
 from sqlalchemy.ext.asyncio import AsyncSession # type: ignore
 from fastapi.encoders import jsonable_encoder
-from typing import Any, Dict, Optional, TypeVar, Union
+from typing import Any, Dict, List, Optional, TypeVar, Union
 from datetime import datetime
 from . import models, schemas
 
@@ -28,6 +28,15 @@ async def create_workflow(session: AsyncSession, workflow: schemas.WorkflowCreat
     return db_workflow
 
 
+async def read_workflow_multi(session: AsyncSession, offset: int=0, limit: int=100) -> List[models.Workflow]:
+    result = await session.execute(
+            select(models.Workflow).offset(offset).limit(limit)
+        )
+    # Note the use of .scalars() to get ScarlarResult, i.e. Pydantic model, instead of Row object
+    db_obj_list: Optional[List[models.Workflow]] = result.scalars().all()
+    return db_obj_list
+
+
 async def update_workflow(session: AsyncSession, workflow: schemas.WorkflowUpdate) -> Union[models.Workflow, None]:
     """Update workflow and associated jobs
 
@@ -44,6 +53,7 @@ async def update_workflow(session: AsyncSession, workflow: schemas.WorkflowUpdat
     query = await session.execute(
             select(models.Workflow).where(models.Workflow.id == workflow.id)
         )
+    # Note the use of .scalars() to get ScarlarResult, i.e. Pydantic model, instead of Row object
     db_obj: Optional[models.Workflow] = query.scalars().first()
     obj_data = jsonable_encoder(db_obj)
     update_data = workflow.dict(exclude_unset=True)
