@@ -94,11 +94,11 @@ class WorkflowUpdate(WorkflowBase):
 
 class Workflow(WorkflowCreate):
     id: int          # primary key
-    status: str
-    done: int
-    total: int
+    status: Optional[str] # TODO: for all optionals, consider an init value in models.py
+    done: Optional[int] # TODO: is init, so should never be None, but is when pipeline running?
+    total: Optional[int] # TODO: is init, so should never be None, but is when pipeline running?
     started_at: datetime
-    completed_at: datetime
+    completed_at: Optional[datetime]
     last_update_at: str # TODO: use proper DateTime
 
     class Config:
