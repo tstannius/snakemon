@@ -29,8 +29,9 @@ async def create_workflow(session: AsyncSession, workflow: schemas.WorkflowCreat
 
 
 async def read_workflow_multi(session: AsyncSession, offset: int=0, limit: int=100) -> List[models.Workflow]:
+    # TODO: Optional order_by
     result = await session.execute(
-            select(models.Workflow).offset(offset).limit(limit)
+            select(models.Workflow).order_by(models.Workflow.id.desc()).offset(offset).limit(limit)
         )
     # Note the use of .scalars() to get ScarlarResult, i.e. Pydantic model, instead of Row object
     db_obj_list: Optional[List[models.Workflow]] = result.scalars().all()
