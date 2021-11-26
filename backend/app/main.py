@@ -11,7 +11,7 @@ from pprint import pprint
 # db dependency - TODO: put elsewhere
 from db import crud, models, schemas
 from db.session import async_session
-from typing import AsyncGenerator
+from typing import AsyncGenerator, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 
 async def get_session() -> AsyncGenerator[AsyncSession, None]:
@@ -72,9 +72,11 @@ async def update_workflow_status(
 
 
 @app.get("/workflows", response_model=List[schemas.Workflow])
-async def get_workflows(session: AsyncSession = Depends(get_session)):
-    # TODO: add query params to path operation
-    workflows = await crud.read_workflow_multi(session)
+async def get_workflows(
+            offset: Optional[int] = 0,
+            limit: Optional[int] = 100,
+            session: AsyncSession = Depends(get_session)):
+    workflows = await crud.read_workflow_multi(session, offset, limit)
     return workflows
 
 
