@@ -4,7 +4,7 @@ import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 import { Routes, Route, Outlet } from "react-router-dom";
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { useTable, Column } from 'react-table';
+import { Column, useSortBy, useTable } from 'react-table';
 import Table from 'react-bootstrap/Table';
 import './App.css';
 
@@ -57,7 +57,7 @@ function WorkflowsTable(props: IWorklowsTableProps): JSX.Element {
   } = useTable({
     columns,
     data,
-  })
+  }, useSortBy)
 
   // Render the UI for your table
   return (
@@ -71,7 +71,7 @@ function WorkflowsTable(props: IWorklowsTableProps): JSX.Element {
             {// Loop over the headers in each row
             headerGroup.headers.map(column => (
               // Apply the header cell props
-              <th {...column.getHeaderProps()}>
+              <th {...column.getHeaderProps(column.getSortByToggleProps())}>
                 {// Render the header
                 column.render('Header')}
               </th>

@@ -4,6 +4,7 @@
   - Sort data (default: started_at, recent-to-old)
   - Pagination (limit to 30?)
   - Get latest data, i.e. rows last inserted
+  - Handle react-tables types: https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/react-table#configuration-using-declaration-merging
 - Cleanup and organize components
 
 ### Done
