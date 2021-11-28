@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { CSSProperties } from 'react';
 import Container from 'react-bootstrap/Container'
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
@@ -7,15 +7,18 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { Column, useSortBy, useTable } from 'react-table';
 import Table from 'react-bootstrap/Table';
 import './App.css';
+import { ReactComponent as Logo } from './assets/favicon.svg';
 
 
 class Layout extends React.Component {
   render(): JSX.Element {
     return (
       <div>
-        <Navbar bg="light">
+        <Navbar bg="light" sticky="top">
           <Container>
-            <Navbar.Brand href="/">SnakeMon</Navbar.Brand>
+            <Navbar.Brand href="/">
+            <Logo />{' '}
+              SnakeMon</Navbar.Brand>
             <Navbar.Toggle aria-controls="basic-navbar-nav" />
             <Navbar.Collapse id="basic-navbar-nav">
               <Nav className="me-auto">
@@ -69,14 +72,28 @@ function WorkflowsTable(props: IWorklowsTableProps): JSX.Element {
           // Apply the header row props
           <tr {...headerGroup.getHeaderGroupProps()}>
             {// Loop over the headers in each row
-            headerGroup.headers.map(column => (
+            headerGroup.headers.map(column => {
+              return (
+              
               // Apply the header cell props
               <th {...column.getHeaderProps(column.getSortByToggleProps())}>
                 {// Render the header
                 column.render('Header')}
+                {/* Add a sort direction indicator */}
+                {/* see:
+                https://github.com/ggascoigne/react-table-example
+                https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/react-table/Readme.md
+                  */}
+                <span>
+                {column.isSorted
+                  ? column.isSortedDesc
+                  ? ' \u2193'
+                  : ' \u2191'
+                  : ' \u2193\u2191'}
+                </span>
               </th>
-            ))}
-          </tr>
+            )}
+          )}</tr>
         ))}
       </thead>
       {/* Apply the table body props */}
@@ -200,8 +217,13 @@ class Home extends React.Component<IHomeProps, IHomeState> {
   }
 
   render(): JSX.Element {
+    const style = {
+      marginLeft: "auto",
+      marginRight: "auto",
+  } as CSSProperties;
+
     return (
-      <div>
+      <div className="centered">
         <h1>{this.state.message}</h1>
       </div>
     )
