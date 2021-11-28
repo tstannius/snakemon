@@ -1,3 +1,21 @@
 h1 {
   color: red;
 }
+
+:root {
+  --sm-green-bright: rgb(64, 145, 19);
+  --sm-green-dark: rgb(9, 33, 33);
+}
+
+#foo {
+  color: var(--sm-green-dark);
+}
+
+/* How to chain css classes, note the char prefix: */
+/* #header .class tag */
+/* https://medium.com/insider-inc-engineering/delightful-ways-to-write-reusable-css-using-subclasses-903e90c9cf87 */
+.table thead tr th {
+  /* background-color: var(--sm-green-dark);
+  color: var(--sm-green-bright); */
+  color: black
+}
