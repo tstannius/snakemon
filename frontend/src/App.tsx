@@ -4,7 +4,7 @@ import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 import { Routes, Route, Outlet } from "react-router-dom";
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Column, useSortBy, useTable } from 'react-table';
+import { Column, usePagination, useSortBy, useTable } from 'react-table';
 import Table from 'react-bootstrap/Table';
 import './App.css';
 import { ReactComponent as Logo } from './assets/favicon.svg';
@@ -55,16 +55,32 @@ function WorkflowsTable(props: IWorklowsTableProps): JSX.Element {
     getTableProps,
     getTableBodyProps,
     headerGroups,
-    rows,
+    // rows, // we use page instead
     prepareRow,
-  } = useTable({
-    columns,
-    data,
-  }, useSortBy)
+    page,
+    canPreviousPage,
+    canNextPage,
+    pageOptions,
+    pageCount,
+    gotoPage,
+    nextPage,
+    previousPage,
+    setPageSize,
+    state: { pageIndex, pageSize },
+  } = useTable(
+    {
+      columns,
+      data,
+      initialState: { pageIndex: 0 },
+    },
+  useSortBy,
+  usePagination
+  )
 
   // Render the UI for your table
   return (
-    // apply the table props
+    <>
+    {/* apply the table props */}
     <Table {...getTableProps()}>
       <thead>
         {// Loop over the header rows
@@ -99,7 +115,7 @@ function WorkflowsTable(props: IWorklowsTableProps): JSX.Element {
       {/* Apply the table body props */}
       <tbody {...getTableBodyProps()}>
         {// Loop over the table rows
-        rows.map((row, i) => {
+        page.map((row, i) => {
           // Prepare the row for display
           prepareRow(row)
           return (
@@ -119,6 +135,53 @@ function WorkflowsTable(props: IWorklowsTableProps): JSX.Element {
         })}
       </tbody>
     </Table>
+      {/* Pagination can be built however you'd like. 
+      This is just a very basic UI implementation: */}
+      <div className="pagination">
+        <button onClick={() => gotoPage(0)} disabled={!canPreviousPage}>
+          {'<<'}
+        </button>{' '}
+        <button onClick={() => previousPage()} disabled={!canPreviousPage}>
+          {'<'}
+        </button>{' '}
+        <button onClick={() => nextPage()} disabled={!canNextPage}>
+          {'>'}
+        </button>{' '}
+        <button onClick={() => gotoPage(pageCount - 1)} disabled={!canNextPage}>
+          {'>>'}
+        </button>{' '}
+        <span>
+          Page{' '}
+          <strong>
+            {pageIndex + 1} of {pageOptions.length}
+          </strong>{' '}
+        </span>
+        <span>
+          | Go to page:{' '}
+          <input
+            type="number"
+            defaultValue={pageIndex + 1}
+            onChange={e => {
+              const page = e.target.value ? Number(e.target.value) - 1 : 0
+              gotoPage(page)
+            }}
+            style={{ width: '100px' }}
+          />
+        </span>{' '}
+        <select
+          value={pageSize}
+          onChange={e => {
+            setPageSize(Number(e.target.value))
+          }}
+        >
+          {[10, 20, 30, 40, 50].map(pageSize => (
+            <option key={pageSize} value={pageSize}>
+              Show {pageSize}
+            </option>
+          ))}
+        </select>
+      </div>
+      </>
   )
 }
 
