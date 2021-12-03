@@ -1,10 +1,5 @@
 # TODO
 ### Need
-- Improve table view
-  - Sort data (default: started_at, recent-to-old)
-  - Pagination (limit to 30?)
-  - Get latest data, i.e. rows last inserted
-  - Handle react-tables types: https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/react-table#configuration-using-declaration-merging
 - Cleanup and organize components
 
 ### Done
@@ -19,6 +14,11 @@
    1. Try react-bootstrap first
    2. Example for how to get just some data and not all
    3. Fancy table library, see https://react-table.tanstack.com/# Getting Started with Create React App
+- Improve table view
+  - Sort data (default: started_at, recent-to-old)
+  - Pagination (limit to 30?)
+  - Get latest data, i.e. rows last inserted
+  - Handle react-tables types: https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/react-table#configuration-using-declaration-merging
 
 ### Nice (Later)
 ##### More robust API calls with TS typing
