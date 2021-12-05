@@ -136,6 +136,10 @@ function WorkflowsTable(props: IWorklowsTableProps): JSX.Element {
                     cellContent = (
                       <Badge bg="warning">{cell.render("Cell")}</Badge>
                     );
+                  } else if (cell.value === "Error") {
+                    cellContent = (
+                      <Badge bg="danger">{cell.render("Cell")}</Badge>
+                    );
                   } else {
                     cellContent = (
                       <Badge bg="secondary">{cell.render("Cell")}NA</Badge>
