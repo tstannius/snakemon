@@ -5,7 +5,7 @@ import Navbar from 'react-bootstrap/Navbar';
 import { Routes, Route, Outlet } from "react-router-dom";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Column, usePagination, useSortBy, useTable } from 'react-table';
-import Table from 'react-bootstrap/Table';
+import { Card, Table} from 'react-bootstrap';
 import './App.css';
 import { ReactComponent as Logo } from './assets/favicon.svg';
 
@@ -247,7 +247,11 @@ class Workflows extends React.Component<IWorkflowsProps, IWorkflowsState> {
 
   render(): JSX.Element {
     return (
-        <WorkflowsTable columns={this.getColumns()} data={this.state.data}/>
+      <Card style={{margin: "3%"}}>
+        <Card.Body>
+          <WorkflowsTable columns={this.getColumns()} data={this.state.data}/>
+        </Card.Body>
+      </Card>
       )
     }
 }
