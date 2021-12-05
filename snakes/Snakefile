@@ -31,6 +31,8 @@ rule aggregate_deps_ok:
         "tmp/dep-no_wc.txt"
     output:
         "out/result_ok.txt"
+    log: "logs/aggregate_deps_ok/result_ok.txt"
+    benchmark: "benchmarks/aggregate_deps_ok/result_ok.txt"
     run:
         time.sleep(1)
         Path(output[0]).touch()
