@@ -63,6 +63,7 @@ async def update_workflow(session: AsyncSession, workflow: schemas.WorkflowUpdat
         pass
     elif workflow.msg["level"] == "progress":
         db_obj = await update_object(db_obj, obj_data, update_data["msg"])
+        setattr(db_obj, "status", "Running")
         if db_obj.done == db_obj.total:
             setattr(db_obj, "completed_at", datetime.now())
             setattr(db_obj, "status", "Done")
