@@ -1,6 +1,6 @@
 # TODO
 ### Need
-- Cleanup and organize components
+
 
 ### Done
 - Choose component framework, see. https://www.npmtrends.com/antd-vs-material-ui-vs-react-bootstrap-vs-reactstrap-vs-rsuite
@@ -19,6 +19,7 @@
   - Pagination (limit to 30?)
   - Get latest data, i.e. rows last inserted
   - Handle react-tables types: https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/react-table#configuration-using-declaration-merging
+- Cleanup and organize components
 
 ### Nice (Later)
 ##### More robust API calls with TS typing
