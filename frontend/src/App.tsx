@@ -81,6 +81,7 @@ function WorkflowsTable(props: IWorklowsTableProps): JSX.Element {
   return (
     <>
     {/* apply the table props */}
+    <div style={{minHeight: "460px", verticalAlign: "top"}}>
     <Table {...getTableProps()}>
       <thead>
         {// Loop over the header rows
@@ -90,7 +91,7 @@ function WorkflowsTable(props: IWorklowsTableProps): JSX.Element {
             {// Loop over the headers in each row
             headerGroup.headers.map(column => {
               return (
-              
+                
               // Apply the header cell props
               <th {...column.getHeaderProps(column.getSortByToggleProps())}>
                 {// Render the header
@@ -99,7 +100,7 @@ function WorkflowsTable(props: IWorklowsTableProps): JSX.Element {
                 {/* see:
                 https://github.com/ggascoigne/react-table-example
                 https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/react-table/Readme.md
-                  */}
+              */}
                 <span>
                 {column.isSorted
                   ? column.isSortedDesc
@@ -110,7 +111,7 @@ function WorkflowsTable(props: IWorklowsTableProps): JSX.Element {
               </th>
             )}
           )}</tr>
-        ))}
+          ))}
       </thead>
       {/* Apply the table body props */}
       <tbody {...getTableBodyProps()}>
@@ -135,39 +136,10 @@ function WorkflowsTable(props: IWorklowsTableProps): JSX.Element {
         })}
       </tbody>
     </Table>
+    </div>
       {/* Pagination can be built however you'd like. 
       This is just a very basic UI implementation: */}
-      <div className="pagination">
-        <button onClick={() => gotoPage(0)} disabled={!canPreviousPage}>
-          {'<<'}
-        </button>{' '}
-        <button onClick={() => previousPage()} disabled={!canPreviousPage}>
-          {'<'}
-        </button>{' '}
-        <button onClick={() => nextPage()} disabled={!canNextPage}>
-          {'>'}
-        </button>{' '}
-        <button onClick={() => gotoPage(pageCount - 1)} disabled={!canNextPage}>
-          {'>>'}
-        </button>{' '}
-        <span>
-          Page{' '}
-          <strong>
-            {pageIndex + 1} of {pageOptions.length}
-          </strong>{' '}
-        </span>
-        <span>
-          | Go to page:{' '}
-          <input
-            type="number"
-            defaultValue={pageIndex + 1}
-            onChange={e => {
-              const page = e.target.value ? Number(e.target.value) - 1 : 0
-              gotoPage(page)
-            }}
-            style={{ width: '100px' }}
-          />
-        </span>{' '}
+      <div className="pagination" style={{float: "right"}}>
         <select
           value={pageSize}
           onChange={e => {
@@ -180,6 +152,34 @@ function WorkflowsTable(props: IWorklowsTableProps): JSX.Element {
             </option>
           ))}
         </select>
+        <span>
+          Page{' '}
+          <strong>
+            {pageIndex + 1} of {pageOptions.length}
+          </strong>
+          {' '}
+        </span>{' '}
+        <button onClick={() => gotoPage(0)} disabled={!canPreviousPage}>
+          {'<<'}
+        </button>{' '}
+        <button onClick={() => previousPage()} disabled={!canPreviousPage}>
+          {'<'}
+        </button>{' '}
+        <input
+            // type="number"
+            defaultValue={pageIndex + 1}
+            onChange={e => {
+              const page = e.target.value ? Number(e.target.value) - 1 : 0
+              gotoPage(page)
+            }}
+            style={{ width: '50px' }}
+          />
+        <button onClick={() => nextPage()} disabled={!canNextPage}>
+          {'>'}
+        </button>{' '}
+        <button onClick={() => gotoPage(pageCount - 1)} disabled={!canNextPage}>
+          {'>>'}
+        </button>{' '}
       </div>
       </>
   )
@@ -226,14 +226,6 @@ class Workflows extends React.Component<IWorkflowsProps, IWorkflowsState> {
         {
           Header: "Total",
           accessor: "total"
-        },
-        {
-          Header: "Started at",
-          accessor: "started_at"
-        },
-        {
-          Header: "Completed at",
-          accessor: "completed_at"
         },
         {
           Header: "Last update at",
