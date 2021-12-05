@@ -1,10 +1,8 @@
 import React from 'react';
 import { Routes, Route } from "react-router-dom";
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Column, usePagination, useSortBy, useTable } from 'react-table';
-import { Badge, Card, Table} from 'react-bootstrap';
 import { Home, Workflows } from "./views";
-import { NavBar, WorkflowsTable } from './components'
+import { NavBar } from './components'
 import './App.css';
 
 
