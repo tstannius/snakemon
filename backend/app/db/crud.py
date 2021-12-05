@@ -73,6 +73,8 @@ async def update_workflow(session: AsyncSession, workflow: schemas.WorkflowUpdat
     elif workflow.msg["level"] == "debug":
         # infer start / done
         pass
+    elif workflow.msg["level"] == "error":
+        setattr(db_obj, "status", "Error")
     else:
         # TODO handle other cases
         pass
