@@ -5,7 +5,7 @@ import Navbar from 'react-bootstrap/Navbar';
 import { Routes, Route, Outlet } from "react-router-dom";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Column, usePagination, useSortBy, useTable } from 'react-table';
-import { Card, Table} from 'react-bootstrap';
+import { Badge, Card, Table} from 'react-bootstrap';
 import './App.css';
 import { ReactComponent as Logo } from './assets/favicon.svg';
 
@@ -124,11 +124,30 @@ function WorkflowsTable(props: IWorklowsTableProps): JSX.Element {
             <tr {...row.getRowProps()}>
               {// Loop over the rows cells
               row.cells.map(cell => {
+                console.log(cell.column.Header);
+                var cellContent = cell.render("Cell");
+
+                if (cell.column.Header === "Status") {
+                  if (cell.value === "Done") {
+                    cellContent = (
+                      <Badge bg="success">{cell.render("Cell")}</Badge>
+                    );
+                  } else if (cell.value === "Running") {
+                    cellContent = (
+                      <Badge bg="warning">{cell.render("Cell")}</Badge>
+                    );
+                  } else {
+                    cellContent = (
+                      <Badge bg="secondary">{cell.render("Cell")}NA</Badge>
+                    );
+                  }
+                }
+                
                 // Apply the cell props
                 return (
                   <td {...cell.getCellProps()}>
                   {// Render the cell contents
-                  cell.render('Cell')}
+                  cellContent}
                   </td>)
               })}
             </tr>
