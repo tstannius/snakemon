@@ -1,5 +1,5 @@
 import { Column, usePagination, useSortBy, useTable } from 'react-table';
-import { Badge, Table} from 'react-bootstrap';
+import { Badge, Form, Pagination, Table} from 'react-bootstrap';
 
 interface IWorklowsTableProps {
     columns: Array<Column>,
@@ -123,51 +123,42 @@ function WorkflowsTable(props: IWorklowsTableProps): JSX.Element {
         </tbody>
       </Table>
       </div>
-        {/* Pagination can be built however you'd like. 
-        This is just a very basic UI implementation: */}
-        <div className="pagination" style={{float: "right"}}>
-          <select
-            value={pageSize}
-            onChange={e => {
-              setPageSize(Number(e.target.value))
-            }}
-          >
-            {[10, 20, 30, 40, 50].map(pageSize => (
-              <option key={pageSize} value={pageSize}>
-                Show {pageSize}
-              </option>
-            ))}
-          </select>
-          <span>
+      <div style={{float: "right", display: "flex", flexDirection: "row", marginTop: "2%", marginRight: "2%", whiteSpace: "nowrap"}}>
+          <span style={{margin: "2%"}}>
             Page{' '}
             <strong>
               {pageIndex + 1} of {pageOptions.length}
             </strong>
-            {' '}
-          </span>{' '}
-          <button onClick={() => gotoPage(0)} disabled={!canPreviousPage}>
-            {'<<'}
-          </button>{' '}
-          <button onClick={() => previousPage()} disabled={!canPreviousPage}>
-            {'<'}
-          </button>{' '}
-          <input
-              // type="number"
-              defaultValue={pageIndex + 1}
-              onChange={e => {
-                const page = e.target.value ? Number(e.target.value) - 1 : 0
-                gotoPage(page)
-              }}
-              style={{ width: '50px' }}
-            />
-          <button onClick={() => nextPage()} disabled={!canNextPage}>
-            {'>'}
-          </button>{' '}
-          <button onClick={() => gotoPage(pageCount - 1)} disabled={!canNextPage}>
-            {'>>'}
-          </button>{' '}
-        </div>
-        </>
+          </span>
+        <Form.Select style={{height: "38px", width: "120px", marginRight: "2%"}}
+          value={pageSize}
+          onChange={e => {
+            setPageSize(Number(e.target.value))
+          }}
+        >
+          {[10, 20, 30, 40, 50].map(pageSize => (
+            <option key={pageSize} value={pageSize}>
+              Show {pageSize}
+            </option>
+          ))}
+        </Form.Select>
+        <Pagination>
+          <Pagination.First onClick={() => gotoPage(0)} disabled={!canPreviousPage}/>
+          <Pagination.Prev onClick={() => previousPage()} disabled={!canPreviousPage}/>
+        <input
+            // type="number"
+            defaultValue={pageIndex + 1}
+            onChange={e => {
+              const page = e.target.value ? Number(e.target.value) - 1 : 0
+              gotoPage(page)
+            }}
+            style={{height: "38px", width: '50px'}}
+          />
+          <Pagination.Next onClick={() => nextPage()} disabled={!canNextPage}/>
+          <Pagination.Last onClick={() => gotoPage(pageCount - 1)} disabled={!canNextPage}/>
+        </Pagination>
+      </div>
+      </>
     )
   }
 

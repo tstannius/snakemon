@@ -64,7 +64,7 @@ class Workflows extends React.Component<IWorkflowsProps, IWorkflowsState> {
 
   render(): JSX.Element {
     return (
-      <Card style={{margin: "3%"}}>
+      <Card body style={{margin: "3%"}}>
         <Card.Body>
           <WorkflowsTable columns={this.getColumns()} data={this.state.data}/>
         </Card.Body>
