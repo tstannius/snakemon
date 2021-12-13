@@ -20,6 +20,32 @@ async def update_object(obj: ModelType, obj_data: Dict[str, Any], update_data: D
     return obj
 
 
+async def create_job(session: AsyncSession, job: schemas.JobCreate) -> models.Job:
+    db_job = models.Job(**job.dict())
+    session.add(db_job)
+    await session.commit()
+    await session.refresh(db_job)
+    return db_job
+
+async def update_job(session: AsyncSession, job: schemas.JobUpdate) -> models.Job:
+    query = await session.execute(
+            select(models.Job)
+                .where(models.Job.workflow_id == job.workflow_id)
+                .where(models.Job.jobid == job.jobid)
+        )
+    db_obj: Optional[models.Job] = query.scalars().first()
+    obj_data = jsonable_encoder(db_obj)
+    update_data = job.dict(exclude_unset=True)
+    
+    db_obj = await update_object(db_obj, obj_data, update_data)
+
+    session.add(db_obj)
+    await session.commit()
+    await session.refresh(db_obj)
+    
+    return db_obj
+
+
 async def create_workflow(session: AsyncSession, workflow: schemas.WorkflowCreate) -> models.Workflow:
     db_workflow = models.Workflow(**workflow.dict())
     session.add(db_workflow)
@@ -60,13 +86,22 @@ async def update_workflow(session: AsyncSession, workflow: schemas.WorkflowUpdat
     update_data = workflow.dict(exclude_unset=True)
     
     if workflow.msg["level"] == "job_info":
-        pass
+        await create_job(session=session, job=schemas.JobCreate(**{"workflow_id": workflow.id, **workflow.msg}))
     elif workflow.msg["level"] == "progress":
         db_obj = await update_object(db_obj, obj_data, update_data["msg"])
         setattr(db_obj, "status", "Running")
         if db_obj.done == db_obj.total:
             setattr(db_obj, "completed_at", datetime.now())
             setattr(db_obj, "status", "Done")
+    elif workflow.msg["level"] == "job_finished":
+        await update_job(session, job=schemas.JobUpdate(**{"jobid": workflow.msg["jobid"],
+                                                           "workflow_id": workflow.id, 
+                                                           "completed_at": datetime.now(),
+                                                           "status": "Done"}))
+    elif workflow.msg["level"] == "job_error":
+        await update_job(session, job=schemas.JobUpdate(**{"jobid": workflow.msg["jobid"],
+                                                           "workflow_id": workflow.id, 
+                                                           "status": "Error"}))
     elif workflow.msg["level"] == "resources_info":
         # only used for actual runs
         pass
@@ -80,7 +115,8 @@ async def update_workflow(session: AsyncSession, workflow: schemas.WorkflowUpdat
         pass
     
     # timestamp is always updated
-    setattr(db_obj, "last_update_at", update_data["timestamp"]) # TODO rename to timestamp?
+    setattr(db_obj, "last_update_at", datetime.now())
+    setattr(db_obj, "timestamp", update_data["timestamp"])
     session.add(db_obj)
     await session.commit()
     await session.refresh(db_obj)
