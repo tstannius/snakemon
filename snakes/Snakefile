@@ -8,21 +8,18 @@ rule touch_no_wc:
     output:
         "tmp/dep-no_wc.txt"
     run:
-        time.sleep(1)
         Path(output[0]).touch()
 
 rule touch_dep_slow:
     output:
         "tmp/dep-slow-{sample}.txt"
     run:
-        time.sleep(3)
         Path(output[0]).touch()
 
 rule touch_dep_fast:
     output:
         "tmp/dep-fast-{sample}.txt"
     run:
-        time.sleep(1)
         Path(output[0]).touch()
 
 rule aggregate_deps_ok:
@@ -34,7 +31,6 @@ rule aggregate_deps_ok:
     log: "logs/aggregate_deps_ok/result_ok.txt"
     benchmark: "benchmarks/aggregate_deps_ok/result_ok.txt"
     run:
-        time.sleep(1)
         Path(output[0]).touch()
 
 rule aggregate_deps_and_fail:
@@ -45,7 +41,6 @@ rule aggregate_deps_and_fail:
     log:
         "logs/aggregate_deps_and_fail.log"
     run:
-        time.sleep(1)
         assert(False), "This rule will fail"
         Path(output[0]).touch()
 
@@ -55,7 +50,7 @@ rule aggregate_deps_and_missing_output:
     output:
         "out/result_missing.txt"
     run:
-        time.sleep(1)
+        Path("out/someotherfile.txt").touch()
 
 rule all_w_missing:
     input:
