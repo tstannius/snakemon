@@ -59,7 +59,7 @@ rule aggregate_deps_and_missing_output:
 
 rule all_w_missing:
     input:
-        "out/result_fail.txt"
+        "out/result_missing.txt"
 
 rule all_w_fail:
     input:
