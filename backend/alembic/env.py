@@ -1,7 +1,9 @@
 from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config, pool
-
+from sqlalchemy.ext.asyncio import AsyncEngine
+from asyncio import get_event_loop
+from app.core.config import settings
 from alembic import context
 
 # this is the Alembic Config object, which provides
@@ -28,12 +30,12 @@ target_metadata = Base.metadata
 def get_url():
     """Get URL of database
     
-    Can be modified to return e.g. postgresql database url
+    Modify app core config to return e.g. postgresql database url
 
     Returns:
         str: url
     """
-    return f"sqlite:///./app/snakemon.db"
+    return settings.DEFAULT_SQLALCHEMY_DATABASE_URI
 
 
 def run_migrations_offline():
@@ -61,7 +63,20 @@ def run_migrations_offline():
         context.run_migrations()
 
 
-def run_migrations_online():
+def do_run_migrations(connection):
+    """Run migrations synchronously
+    
+    Call from async engine
+    """
+    context.configure(
+        connection=connection, target_metadata=target_metadata, compare_type=True
+    )
+
+    with context.begin_transaction():
+        context.run_migrations()
+
+
+async def run_migrations_online():
     """Run migrations in 'online' mode.
 
     In this scenario we need to create an Engine
@@ -70,24 +85,20 @@ def run_migrations_online():
     """
     # from fastapi template
     configuration = config.get_section(config.config_ini_section)
+    assert configuration
     configuration["sqlalchemy.url"] = get_url()
     
-    connectable = engine_from_config(
+    connectable = AsyncEngine(engine_from_config(
         configuration,
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
-    )
+    ))
 
-    with connectable.connect() as connection:
-        context.configure(
-            connection=connection, target_metadata=target_metadata, compare_type=True,
-        )
-
-        with context.begin_transaction():
-            context.run_migrations()
+    async with connectable.connect() as connection:
+        await connection.run_sync(do_run_migrations)
 
 
 if context.is_offline_mode():
     run_migrations_offline()
 else:
-    run_migrations_online()
+    get_event_loop().run_until_complete(run_migrations_online())

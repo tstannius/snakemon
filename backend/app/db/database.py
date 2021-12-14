@@ -1,8 +1,9 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-SQLALCHEMY_DATABASE_URL = "sqlite:///./app/snakemon.db" # TODO: get from settings
-# SQLALCHEMY_DATABASE_URL = "postgresql://user:password@postgresserver/db"
+from app.core.config import settings
+
+SQLALCHEMY_DATABASE_URL = settings.DEFAULT_SQLALCHEMY_DATABASE_URI
 
 # check_same_thread only needed for sqlite
 engine = create_engine(
