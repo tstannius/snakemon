@@ -53,7 +53,7 @@ class Workflows extends React.Component<IWorkflowsProps, IWorkflowsState> {
   }
 
   componentDidMount() {
-    fetch("http://localhost:8000/workflows", {method: "GET", mode: "cors"})
+    fetch("http://localhost:8000/workflows/", {method: "GET", mode: "cors"})
     .then(response => response.json())
     .then(data => {
       this.setState({
