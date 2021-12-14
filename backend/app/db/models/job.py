@@ -1,24 +1,7 @@
-"""SQLAlchemy database models
-
-These models define the database tables
-"""
 from datetime import datetime
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String
-from sqlalchemy.ext.declarative import as_declarative, declared_attr
 from sqlalchemy.orm import relationship
-from typing import Any
-
-
-@as_declarative()
-class Base:
-    id: Any
-    __name__: str
-    # Generate __tablename__ automatically
-    @declared_attr
-    def __tablename__(cls) -> str:
-        # TODO: consider making django-like table name
-        # Alembic and FastAPI will still know what to do
-        return cls.__name__.lower()
+from .base import Base
 
 
 class Job(Base):
@@ -74,28 +57,5 @@ class Job(Base):
         self.is_checkpoint = is_checkpoint
         self.shell_command = shell_command
         self.status = status
-        self.started_at = datetime.now()
-        self.last_update_at = datetime.now()
-
-
-class Workflow(Base):
-    id = Column(Integer, primary_key=True)
-    workflow = Column(String(50), unique=False)
-    name = Column(String(50), unique=False)
-    status = Column(String(30), unique=False)
-    done = Column(Integer, unique=False)
-    total = Column(Integer, unique=False)
-    started_at = Column(DateTime)
-    completed_at = Column(DateTime)
-    last_update_at = Column(DateTime)
-    timestamp = Column(String(30))
-    
-    jobs = relationship("Job", back_populates="workflow")
-
-    def __init__(self, workflow, name):
-        self.workflow = workflow
-        self.name = name
-        self.done = 0
-        self.total = 0
         self.started_at = datetime.now()
         self.last_update_at = datetime.now()

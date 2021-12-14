@@ -10,7 +10,7 @@ from datetime import datetime
 from . import models, schemas
 
 
-ModelType = TypeVar("ModelType", bound=schemas.BaseModel)
+ModelType = TypeVar("ModelType", bound=models.Base)
 
 
 async def update_object(obj: ModelType, obj_data: Dict[str, Any], update_data: Dict[str, Any]) -> None:

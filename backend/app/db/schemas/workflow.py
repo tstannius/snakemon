@@ -1,12 +1,5 @@
-"""Pydantic schemas
-
-Schemas aka. models. We use the term schemas here to not confuse schemas with
-SQLAlchemy models
-
-Schemas are used by FastAPI for request validation.
-"""
 from fastapi import Form
-from typing import Any, Dict, List, Optional, Type, Union
+from typing import Any, Dict, List, Optional, Type
 from datetime import datetime
 from pathlib import Path
 from pydantic import BaseModel, Json
@@ -40,52 +33,6 @@ def as_form(cls: Type[BaseModel]):
     setattr(cls, "as_form", _as_form)
     return cls
 
-
-class Job(BaseModel):
-    jobid: int
-    workflow_id: int
-    
-    class Config:
-        orm_mode = True
-
-
-class JobUpdate(Job):
-    completed_at: Optional[datetime] = None
-    last_update_at: datetime = datetime.now()
-    status: str
-    
-    class Config:
-        orm_mode = True
-
-
-class JobCreate(Job):
-    msg: Optional[str] = None
-    name: Optional[str] = None
-    # local 
-    input: Optional[List[str]] = None # TODO use path type?
-    output: Optional[List[str]] = None # TODO use path type?
-    
-    log: Optional[List[str]] = None
-    benchmark: Optional[str] = None
-    wildcards: Optional[Dict[str, str]] = None
-    # wildcard_id: Optional[str] = None # TODO: find out where to put this
-    
-    # reason for job execution
-    
-    # resources
-    # need to parse to extract threads, mem, walltime, path
-    # priority
-    # threads
-    # indent?
-    # printshellcmd
-    # is_handover
-    
-    shell_command: Optional[str] = None
-    is_checkpoint: Optional[bool] = None
-    
-    class Config:
-        orm_mode = True
-    
 
 class WorkflowBase(BaseModel):
     pass
