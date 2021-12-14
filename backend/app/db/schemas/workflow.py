@@ -29,7 +29,7 @@ def as_form(cls: Type[BaseModel]):
 
     sig = inspect.signature(_as_form)
     sig = sig.replace(parameters=new_params)
-    _as_form.__signature__ = sig
+    _as_form.__signature__ = sig # type: ignore
     setattr(cls, "as_form", _as_form)
     return cls
 
@@ -81,7 +81,7 @@ class WorkflowMessage(WorkflowBase):
 class WorkflowUpdate(WorkflowBase):
     id: int
     # msg: Json[WorkflowMessage] # TODO: consider WorkflowMessage, currently no advantage since not in docs
-    msg: Json[Dict[str, Any]] # type: ignore TODO: find out why mypy doesn't like Json
+    msg: Json[Dict[str, Any]] # type: ignore
     timestamp: str
 
 

@@ -16,7 +16,7 @@ class Workflow(Base):
     last_update_at = Column(DateTime)
     timestamp = Column(String(30))
     
-    jobs = relationship("Job", back_populates="workflow")
+    jobs = relationship("Job", back_populates="workflow") # type: ignore
 
     def __init__(self, workflow, name):
         self.workflow = workflow

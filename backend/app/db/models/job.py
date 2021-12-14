@@ -39,7 +39,7 @@ class Job(Base):
     completed_at = Column(DateTime)
     last_update_at = Column(DateTime)
     
-    workflow = relationship("Workflow", back_populates="jobs")
+    workflow = relationship("Workflow", back_populates="jobs") # type: ignore
     
     def __init__(self, workflow_id, jobid, msg, name, input, output, log, 
                  benchmark, wildcards, shell_command, is_checkpoint, 

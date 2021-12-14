@@ -13,7 +13,7 @@ from . import models, schemas
 ModelType = TypeVar("ModelType", bound=models.Base)
 
 
-async def update_object(obj: ModelType, obj_data: Dict[str, Any], update_data: Dict[str, Any]) -> None:
+async def update_object(obj: ModelType, obj_data: Dict[str, Any], update_data: Dict[str, Any]) -> ModelType:
     for field in obj_data:
         if field in update_data:
             setattr(obj, field, update_data[field]) # does this happen inplace?
@@ -54,7 +54,7 @@ async def create_workflow(session: AsyncSession, workflow: schemas.WorkflowCreat
     return db_workflow
 
 
-async def read_workflow_multi(session: AsyncSession, offset: int=0, limit: int=100) -> List[models.Workflow]:
+async def read_workflow_multi(session: AsyncSession, offset: Optional[int]=0, limit: Optional[int]=100) -> List[models.Workflow]:
     # TODO: Optional order_by
     result = await session.execute(
             select(models.Workflow).order_by(models.Workflow.id.desc()).offset(offset).limit(limit)
