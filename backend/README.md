@@ -37,3 +37,9 @@ alembic revision --autogenerate -m "Init db"
 # inspect migration script in alembic/versions and sanity check, before upgrade
 alembic upgrade head
 ```
+
+### Run backend
+```
+cd backend
+uvicorn app.main:app --reload
+```
