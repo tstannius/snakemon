@@ -25,6 +25,11 @@ from typing import Dict, List, Union
 from pydantic import AnyHttpUrl, AnyUrl, BaseSettings, EmailStr, validator
 
 class Settings(BaseSettings):
+    # CORE SETTINGS
+    SECRET_KEY: str # TODO: place in env
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440 # 24h TODO: place in env
+    REFRESH_TOKEN_EXPIRE_MINUTES: int = 40320 # 1 month TODO: place in env
+    JWT_ALGORITHM: str = "HS256"
     
     # DATABASE PRODUCTION
     DEFAULT_DATABASE_HOSTNAME: str = "" # TODO: place var in env
