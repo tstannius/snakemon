@@ -13,3 +13,7 @@ alembic revision --autogenerate -m "Init db"
 
 # inspect migration script in alembic/versions and sanity check, before upgrade
 alembic upgrade head
+
+# inital data
+# note the python module notation
+python3 -m app.init_app
