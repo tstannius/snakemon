@@ -26,7 +26,10 @@ from pydantic import AnyHttpUrl, AnyUrl, BaseSettings, EmailStr, validator
 
 class Settings(BaseSettings):
     # CORE SETTINGS
-    SECRET_KEY: str # TODO: place in env
+    ENVIRONMENT: str
+    
+    # AUTHENTICATION
+    SECRET_KEY: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440 # 24h TODO: place in env
     REFRESH_TOKEN_EXPIRE_MINUTES: int = 40320 # 1 month TODO: place in env
     JWT_ALGORITHM: str = "HS256"
@@ -55,7 +58,7 @@ class Settings(BaseSettings):
         )
     
     class Config:
-        env_file = 'dev.env'
+        env_file = '.env' # TODO: get from other config to use dev or prod
         case_sensitive = True
         
 settings: Settings = Settings()
