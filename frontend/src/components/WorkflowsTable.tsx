@@ -87,7 +87,6 @@ function WorkflowsTable(props: IWorklowsTableProps): JSX.Element {
               <tr {...row.getRowProps()}>
                 {// Loop over the rows cells
                 row.cells.map(cell => {
-                  console.log(cell.column.Header);
                   var cellContent = cell.render("Cell");
   
                   if (cell.column.Header === "Status") {
