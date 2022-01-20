@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Response
 from fastapi.security import OAuth2PasswordRequestForm
 from jose import jwt
 from pydantic import ValidationError
@@ -15,8 +15,9 @@ from app.db.models import User
 
 router = APIRouter()
 
-@router.post("/access-token", response_model=schemas.Token)
+@router.post("/access-token")
 async def login_access_token(
+    response: Response,
     session: AsyncSession = Depends(deps.get_session),
     form_data: OAuth2PasswordRequestForm = Depends(),
 ):
@@ -32,14 +33,23 @@ async def login_access_token(
         raise HTTPException(status_code=400, detail="Incorrect username or password")
 
     access_token, expire_at = security.create_access_token(user.id)
-    refresh_token, refresh_expire_at = security.create_refresh_token(user.id)
-    return {
-        "token_type": "bearer",
-        "access_token": access_token,
-        "expire_at": expire_at,
-        "refresh_token": refresh_token,
-        "refresh_expire_at": refresh_expire_at,
-    }
+    # refresh_token, refresh_expire_at = security.create_refresh_token(user.id)
+    
+    response.set_cookie(key="access_token", 
+                        value=f"Bearer {access_token}", 
+                        httponly=True, 
+                        secure=True, 
+                        samesite="lax") # TODO: check args
+    
+    return {"message": "Success"}
+
+
+@router.post("/delete-token", status_code=status.HTTP_200_OK)
+async def logout(
+    response: Response, 
+    current_user: User = Depends(deps.get_current_user)):
+    response.delete_cookie("access_token")
+    return {"message": "Success"}
 
 
 @router.post("/test-token", response_model=schemas.User)

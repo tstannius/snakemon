@@ -10,22 +10,23 @@ from pydantic import ValidationError
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from typing import AsyncGenerator
+from typing import AsyncGenerator, Optional
 
 from app.db import schemas
 from app.db.models import User
 from app.db.session import async_session
-from app.core import security
 from app.core.config import settings
+from app.core.oauth2 import OAuth2PasswordBearerWithCookie
 
 async def get_session() -> AsyncGenerator[AsyncSession, None]:
     async with async_session() as session:
         yield session
 
-reusable_oauth2 = OAuth2PasswordBearer(tokenUrl="auth/access-token")
+reusable_oauth2_cookie = OAuth2PasswordBearerWithCookie(tokenUrl="auth/access-token")
+# reusable_oauth2_request = OAuth2PasswordBearer(tokenUrl="auth/access-token") # TODO: reimplement token auth
 
 async def get_current_user(
-    session: AsyncSession = Depends(get_session), token: str = Depends(reusable_oauth2)
+    session: AsyncSession = Depends(get_session), token: str = Depends(reusable_oauth2_cookie)
 ) -> User:
 
     try:
