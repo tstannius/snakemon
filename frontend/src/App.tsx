@@ -1,9 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { Routes, Route } from "react-router-dom";
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Home, Signin, Signup, Test, Workflows } from "./views";
-import { NavBar } from './components'
 import './App.css';
+
+import {
+  Home,
+  Signin,
+  Signup,
+  Test,
+  WorkflowDetail,
+  Workflows
+} from "./views";
+import { NavBar } from './components'
 import { authProvider } from "./utils/auth";
 
 
@@ -22,6 +30,8 @@ export default function App(): JSX.Element {
       <Route path="/" element={<NavBar user={user} setUser={setUser} />}>
         <Route index element={<Home />} /> {/* note only home has index */}
         <Route path="/workflows" element={<Workflows />} />
+          {/* TODO: consider other placement */}
+          <Route path="/workflows/:workflowId" element={<WorkflowDetail />} />
         <Route path="/signin" element={<Signin user={user} setUser={setUser} />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/test" element={<Test />} />
