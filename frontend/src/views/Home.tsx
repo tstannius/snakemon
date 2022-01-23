@@ -1,4 +1,4 @@
-import React, { CSSProperties } from 'react';
+import React from 'react';
 
 interface IHomeProps {}
 interface IHomeState {
@@ -19,11 +19,6 @@ class Home extends React.Component<IHomeProps, IHomeState> {
   }
 
   render(): JSX.Element {
-    const style = {
-      marginLeft: "auto",
-      marginRight: "auto",
-  } as CSSProperties;
-
     return (
       <div className="centered">
         <h1>{this.state.message}</h1>
