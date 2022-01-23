@@ -1,6 +1,12 @@
 import Home from "./Home";
-import Workflows from "./Workflows"
+import Signin from "./Signin";
+import Signup from "./Signup";
+import Test from "./Test";
+import Workflows from "./Workflows";
 
-export { Home, Workflows };
-export * from "./Signin";
-export * from "./Signup";
+export { Home,
+    Signin,
+    Signup,
+    Test,
+    Workflows 
+};

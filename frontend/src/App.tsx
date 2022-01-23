@@ -1,32 +1,36 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Routes, Route } from "react-router-dom";
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Home, Signin, Signup, Workflows } from "./views";
+import { Home, Signin, Signup, Test, Workflows } from "./views";
 import { NavBar } from './components'
 import './App.css';
+import { authProvider } from "./utils/auth";
 
 
+export default function App(): JSX.Element {
+  const [user, setUser] = useState<null|string>(null); // Todo - get user, instead of reset
 
-class App extends React.Component {
-  render(): JSX.Element {
-    return (
-      <div className="App">
-        <Routes>
-        <Route path="/" element={<NavBar />}>
-          <Route index element={<Home />} /> {/* note only home has index */}
-          <Route path="workflows" element={<Workflows />} />
-          <Route path="/signin" element={<Signin />} />
-          <Route path="/signup" element={<Signup />} />
+  useEffect(() => {
+    authProvider.TestToken().then((result) => {
+        setUser(result);
+    });
+  }, [])
 
-          {/* Using path="*"" means "match anything", so this route
-                acts like a catch-all for URLs that we don't have explicit
-                routes for. */}
-          {/* <Route path="*" element={<Home />} /> */}
-        </Route>
-      </Routes>
-      </div>
-    )
-  }
+  return (
+    <div className="App">
+      <Routes>
+      <Route path="/" element={<NavBar user={user} setUser={setUser} />}>
+        <Route index element={<Home />} /> {/* note only home has index */}
+        <Route path="/workflows" element={<Workflows />} />
+        <Route path="/signin" element={<Signin user={user} setUser={setUser} />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/test" element={<Test />} />
+        {/* Using path="*"" means "match anything", so this route
+              acts like a catch-all for URLs that we don't have explicit
+            routes for. */}
+        <Route path="*" element={<Home />}/>
+      </Route>
+    </Routes>
+    </div>
+  )
 }
-
-export default App;

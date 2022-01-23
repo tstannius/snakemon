@@ -1,9 +1,11 @@
-// todo create register page
-import React, { FC, useState } from 'react';
+import React from 'react';
 
-export const Signup: FC = () => {
 
+
+export default function Signup(): JSX.Element {
     return (
-        <h1>placeholder</h1>
+    <div className="centered">
+        <h4>Please contact your admin to create an account</h4>
+    </div>
     )
 };
