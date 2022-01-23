@@ -14,20 +14,51 @@ ModelType = TypeVar("ModelType", bound=models.Base)
 
 
 async def update_object(obj: ModelType, obj_data: Dict[str, Any], update_data: Dict[str, Any]) -> ModelType:
+    """Update database object utility function
+
+    Args:
+        obj (ModelType): Object to update
+        obj_data (Dict[str, Any]): obj as dict
+        update_data (Dict[str, Any]): New data to use in update
+
+    Returns:
+        ModelType: Updated object
+    """
     for field in obj_data:
         if field in update_data:
             setattr(obj, field, update_data[field]) # does this happen inplace?
     return obj
 
 
+
 async def create_job(session: AsyncSession, job: schemas.JobCreate) -> models.Job:
+    """Create workflow job
+
+    Args:
+        session (AsyncSession): Database session
+        job (schemas.JobCreate): Schema of data to load into database
+
+    Returns:
+        models.Job: Database model object
+    """
     db_job = models.Job(**job.dict())
     session.add(db_job)
     await session.commit()
     await session.refresh(db_job)
     return db_job
 
+
+
 async def update_job(session: AsyncSession, job: schemas.JobUpdate) -> models.Job:
+    """Update workflow job
+
+    Args:
+        session (AsyncSession): Database session
+        job (schemas.JobUpdate): Schema of updated data to apply in database
+
+    Returns:
+        models.Job: Updated database model object
+    """
     query = await session.execute(
             select(models.Job)
                 .where(models.Job.workflow_id == job.workflow_id)
@@ -46,7 +77,17 @@ async def update_job(session: AsyncSession, job: schemas.JobUpdate) -> models.Jo
     return db_obj
 
 
+
 async def create_workflow(session: AsyncSession, workflow: schemas.WorkflowCreate) -> models.Workflow:
+    """Create workflow
+
+    Args:
+        session (AsyncSession): Database session
+        workflow (schemas.WorkflowCreate): Schema of workflow to create
+
+    Returns:
+        models.Workflow: Created database model object
+    """
     db_workflow = models.Workflow(**workflow.dict())
     session.add(db_workflow)
     await session.commit()
@@ -54,7 +95,37 @@ async def create_workflow(session: AsyncSession, workflow: schemas.WorkflowCreat
     return db_workflow
 
 
+
+async def read_workflow_single(session: AsyncSession, workflow_id: int) -> models.Workflow:
+    """Read single workflow from database
+
+    Args:
+        session (AsyncSession): Database session
+        workflow_id (int): Primary key of workflow
+
+    Returns:
+        models.Workflow: Workflow entry in database, if exists, or None
+    """
+    query = await session.execute(
+            select(models.Workflow)
+                .where(models.Workflow.id == workflow_id)
+        )
+    db_obj: Optional[models.Workflow] = query.scalars().first()
+    return db_obj
+
+
+
 async def read_workflow_multi(session: AsyncSession, offset: Optional[int]=0, limit: Optional[int]=100) -> List[models.Workflow]:
+    """Read multiple workflows from database
+
+    Args:
+        session (AsyncSession): Database session
+        offset (Optional[int], optional): Offset into database rows. Defaults to 0.
+        limit (Optional[int], optional): Limit number of workflows returned. Defaults to 100.
+
+    Returns:
+        List[models.Workflow]: List of workflow entries in database
+    """
     # TODO: Optional order_by
     result = await session.execute(
             select(models.Workflow).order_by(models.Workflow.id.desc()).offset(offset).limit(limit)
@@ -64,6 +135,7 @@ async def read_workflow_multi(session: AsyncSession, offset: Optional[int]=0, li
     return db_obj_list
 
 
+
 async def update_workflow(session: AsyncSession, workflow: schemas.WorkflowUpdate) -> Union[models.Workflow, None]:
     """Update workflow and associated jobs
 
@@ -71,7 +143,7 @@ async def update_workflow(session: AsyncSession, workflow: schemas.WorkflowUpdat
     The kind of update must be inferred from the contents of msg.
 
     Args:
-        session (AsyncSession): database session
+        session (AsyncSession): Database session
         workflow (schemas.WorkflowUpdate): new data to update workflow with
 
     Returns:
