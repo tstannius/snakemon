@@ -1,5 +1,6 @@
 import { Column, usePagination, useSortBy, useTable } from 'react-table';
 import { Badge, Form, Pagination, Table} from 'react-bootstrap';
+import { useNavigate } from "react-router-dom";
 
 interface IWorklowsTableProps {
     columns: Array<Column>,
@@ -8,6 +9,7 @@ interface IWorklowsTableProps {
 function WorkflowsTable(props: IWorklowsTableProps): JSX.Element {
     // Makes a react-table table via useTable, see:
     // see https://react-table.tanstack.com/docs/api/useTable
+    let navigate = useNavigate();
   
     // useTable complains if accessing via props. so we load into constants
     const columns = props.columns
@@ -45,7 +47,7 @@ function WorkflowsTable(props: IWorklowsTableProps): JSX.Element {
       <>
       {/* apply the table props */}
       <div style={{minHeight: "460px", verticalAlign: "top"}}>
-      <Table {...getTableProps()}>
+      <Table hover {...getTableProps()}>
         <thead>
           {// Loop over the header rows
           headerGroups.map(headerGroup => (
@@ -84,7 +86,7 @@ function WorkflowsTable(props: IWorklowsTableProps): JSX.Element {
             prepareRow(row)
             return (
               // Apply the row props
-              <tr {...row.getRowProps()}>
+              <tr {...row.getRowProps()} onClick={() => navigate(`/workflows/${row.values.id}`)}>
                 {// Loop over the rows cells
                 row.cells.map(cell => {
                   var cellContent = cell.render("Cell");
