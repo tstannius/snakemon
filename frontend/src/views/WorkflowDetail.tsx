@@ -25,7 +25,7 @@ interface IWorkflow {
 
 
 export default function WorkflowDetail(): JSX.Element {
-    const [workflow, setWorkflow] = useState<IWorkflow|null>(null);
+    const [workflow, setWorkflow] = useState<IWorkflow|undefined>(undefined);
     let { workflowId } = useParams();
     let navigate = useNavigate();
 
@@ -51,19 +51,52 @@ export default function WorkflowDetail(): JSX.Element {
                         })
                 }
         })
-      }, [])
+      }, []) // The empty array ensures the useEffect is only run once
 
     return(
-        <div id="WorkflowDetail">
-            <h1>Workflow #{workflowId} details</h1>
-            {
-                workflow &&
-                    Object.entries(workflow).map((item, idx) => (
-                        <li key={idx}>
-                            <span>{item[0]}: {item[1]}</span>
-                        </li>
-                    ))
-            }
+        <div id="WorkflowDetail" className="p-3">
+            {/* <h1>Workflow #{workflowId} details</h1> */}
+            <div id="WorkflowDetail-Header">
+                <h1>{workflow?.workflow}</h1>
+                <h3>{workflow?.name}</h3>
+            </div>
+            <hr/>
+
+            <div id="WorkflowDetail-Body" className="row">
+
+                <div id="WorkflowDetail-General" className="col-4">
+                    <div className="card">
+                        <div className="card-body">
+                        <h5 className="card-title">General</h5>
+                        <div className="table-responsive">
+
+                            <table className="table table-borderless">
+                            <tbody>{workflow &&
+                                Object.entries(workflow).map((item, idx) => (
+                                    <tr>
+                                        <td>{item[0]}</td>
+                                        <td>{item[1]}</td>
+                                    </tr>
+                                    ))}</tbody>
+                            </table>
+                        </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="WorkflowDetail-Jobs" className="col-8">
+                    <div className="card">
+                        <div className="card-body">
+                            <h5 className="card-title">Jobs</h5>
+                            <p>Jobs</p>
+                        </div>
+                    </div>
+                </div>
+
+                
+
+            </div>
+
         </div>
     )
 }
