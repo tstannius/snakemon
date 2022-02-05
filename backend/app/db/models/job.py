@@ -1,7 +1,9 @@
 from datetime import datetime
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
+import json
 from .base import Base
+
 
 
 class Job(Base):
@@ -52,10 +54,30 @@ class Job(Base):
         self.output = ','.join(output)
         self.log = ','.join(log)
         self.benchmark = benchmark
-        self.wildcards = ','.join([f"{k}:{v}" for k,v in wildcards.items()])
+        self.wildcards = json.dumps(wildcards)
         self.wildcard_id = None # TODO: infer from wildcards and env?
         self.is_checkpoint = is_checkpoint
         self.shell_command = shell_command
         self.status = status
         self.started_at = datetime.now()
         self.last_update_at = datetime.now()
+        
+    def json(self):
+        return {
+            "id": self.id,
+            "jobid": self.jobid,
+            "workflow_id": self.workflow_id,
+            "msg": self.msg,
+            "name": self.name,
+            "input": self.input.split(','),
+            "output": self.input.split(','),
+            "log": self.log.split(','),
+            "benchmark": self.benchmark,
+            "wildcards": json.loads(self.wildcards),
+            "shell_command": self.shell_command,
+            "is_checkpoint": self.is_checkpoint,
+            "status": self.status,
+            "started_at": self.started_at,
+            "completed_at": self.completed_at,
+            "last_update_at": self.last_update_at
+        }

@@ -49,6 +49,28 @@ async def create_job(session: AsyncSession, job: schemas.JobCreate) -> models.Jo
 
 
 
+async def read_workflow_jobs(session: AsyncSession,  workflow_id: int) -> List[models.Job]:
+    """Read multiple jobs associated with workflow
+
+    Args:
+        session (AsyncSession): Database session
+        workflow_id (int): Primary key of workflow
+
+    Returns:
+        List[models.Job]: Jobs associated with given workflow
+    """
+    
+    result = await session.execute(
+            select(models.Job)
+                .where(models.Job.workflow_id == workflow_id)
+        )
+    # Note the use of .scalars() to get ScarlarResult, i.e. Pydantic model, instead of Row object
+    db_obj_list: Optional[List[models.Job]] = result.scalars().all()
+    
+    return db_obj_list
+
+
+
 async def update_job(session: AsyncSession, job: schemas.JobUpdate) -> models.Job:
     """Update workflow job
 
