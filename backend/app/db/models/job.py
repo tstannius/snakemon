@@ -7,20 +7,19 @@ from .base import Base
 
 
 class Job(Base):
-    id = Column(Integer, primary_key=True)
-    jobid = Column(Integer, unique=False)
-    workflow_id = Column(Integer, ForeignKey('workflow.id'))
+    id = Column(Integer, primary_key=True) # primary key
+    jobid = Column(Integer, unique=False) # from Snakemake
     
-    msg = Column(String(100), unique=False)
-    name = Column(String(40), unique=False)
+    msg = Column(String(1024), unique=False)
+    name = Column(String(128), unique=False)
     # local = Column(Boolean(), unique=False)
-    input = Column(String(1000), unique=False)
-    output = Column(String(1000), unique=False)
+    input = Column(String(1024), unique=False)
+    output = Column(String(1024), unique=False)
     
-    log = Column(String(100), unique=False) # path to log
-    benchmark = Column(String(100), unique=False) # path to benchmark
-    wildcards = Column(String(100), unique=False) # dict of wildcards
-    wildcard_id = Column(String(100), unique=False) # sample identifier
+    log = Column(String(1024), unique=False) # path to log
+    benchmark = Column(String(512), unique=False) # path to benchmark
+    wildcards = Column(String(512), unique=False) # dict of wildcards
+    wildcard_id = Column(String(128), unique=False) # sample identifier
     
     # reason for job execution
     
@@ -32,15 +31,17 @@ class Job(Base):
     # printshellcmd
     # is_handover
     
-    shell_command = Column(String(100), unique=False)
+    shell_command = Column(String(1024), unique=False)
     is_checkpoint = Column(Boolean, unique=False)
     
     # meta info
-    status = Column(String(30), unique=False)
+    status = Column(String(32), unique=False)
     started_at = Column(DateTime)
     completed_at = Column(DateTime)
     last_update_at = Column(DateTime)
     
+    # relationships
+    workflow_id = Column(Integer, ForeignKey('workflow.id'))
     workflow = relationship("Workflow", back_populates="jobs") # type: ignore
     
     def __init__(self, workflow_id, jobid, msg, name, input, output, log, 
