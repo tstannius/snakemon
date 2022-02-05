@@ -1,8 +1,11 @@
 """
-Put here any Python code that must be runned before application startup.
-It is included in `init.sh` script.
+Put here any code that must be run before application startup
 
-By defualt `main` create a superuser if not exists
+Note that the script must be run as a library module for imports to work
+cd backend
+python3 -m app.init_app
+
+By defualt `main` creates a superuser if not exists
 """
 import asyncio
 import logging

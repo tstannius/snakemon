@@ -36,6 +36,10 @@ alembic revision --autogenerate -m "Init db"
 
 # inspect migration script in alembic/versions and sanity check, before upgrade
 alembic upgrade head
+
+# run script to initalize db with user and data
+# note that the script must be run as a library module for imports to work
+python3 -m app.init_app
 ```
 
 ### Run backend
