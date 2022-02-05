@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List, Optional
 
-from app.db import crud, schemas
+from app.db import crud, models, schemas
 from app.api import dependencies as deps
 
 router = APIRouter()
@@ -24,7 +24,11 @@ async def get_workflows(
     Returns:
         List[schemas.Workflow]: List of workflow entries
     """
-    workflows = await crud.read_workflow_multi(session, offset, limit)
+    workflows = await crud.read_multi_generic(session, 
+                                              models.Workflow, 
+                                              offset, 
+                                              limit, 
+                                              descending=True)
     return workflows
 
 
@@ -45,7 +49,7 @@ async def get_workflow(
     Returns:
         schemas.Workflow: Workflow entry
     """
-    workflow = await crud.read_workflow_single(session, workflow_id)
+    workflow = await crud.read_generic(session, workflow_id, models.Workflow)
 
     if not workflow:
             raise HTTPException(status_code=404, detail="Workflow not found")

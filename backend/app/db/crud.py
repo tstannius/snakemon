@@ -5,12 +5,16 @@ from sqlalchemy.orm import Session # type: ignore
 from sqlalchemy import select # type: ignore
 from sqlalchemy.ext.asyncio import AsyncSession # type: ignore
 from fastapi.encoders import jsonable_encoder
-from typing import Any, Dict, List, Optional, TypeVar, Union
+from typing import Any, Dict, List, Optional, Type, TypeVar, Union
+from pydantic import BaseModel
 from datetime import datetime
+
 from . import models, schemas
 
-
 ModelType = TypeVar("ModelType", bound=models.Base)
+CreateSchemaType = TypeVar("CreateSchemaType", bound=BaseModel)
+UpdateSchemaType = TypeVar("UpdateSchemaType", bound=BaseModel)
+
 
 
 async def update_object(obj: ModelType, obj_data: Dict[str, Any], update_data: Dict[str, Any]) -> ModelType:
@@ -28,24 +32,6 @@ async def update_object(obj: ModelType, obj_data: Dict[str, Any], update_data: D
         if field in update_data:
             setattr(obj, field, update_data[field]) # does this happen inplace?
     return obj
-
-
-
-async def create_job(session: AsyncSession, job: schemas.JobCreate) -> models.Job:
-    """Create workflow job
-
-    Args:
-        session (AsyncSession): Database session
-        job (schemas.JobCreate): Schema of data to load into database
-
-    Returns:
-        models.Job: Database model object
-    """
-    db_job = models.Job(**job.dict())
-    session.add(db_job)
-    await session.commit()
-    await session.refresh(db_job)
-    return db_job
 
 
 
@@ -100,60 +86,78 @@ async def update_job(session: AsyncSession, job: schemas.JobUpdate) -> models.Jo
 
 
 
-async def create_workflow(session: AsyncSession, workflow: schemas.WorkflowCreate) -> models.Workflow:
-    """Create workflow
+async def create_generic(session: AsyncSession, 
+                         obj_in: CreateSchemaType, 
+                         model: Type[ModelType]) -> ModelType:
+    """Create generic
 
     Args:
         session (AsyncSession): Database session
-        workflow (schemas.WorkflowCreate): Schema of workflow to create
+        obj_in (CreateSchemaType): Schema of object to create
+        model (Type[ModelType]): Database model type
 
     Returns:
-        models.Workflow: Created database model object
+        ModelType: Created database model object
     """
-    db_workflow = models.Workflow(**workflow.dict())
-    session.add(db_workflow)
+    # create db model obj
+    obj_in_data = jsonable_encoder(obj_in) # safer than dict()
+    db_obj = model(**obj_in_data)  # type: ignore
+    # add, commit and refresh db
+    session.add(db_obj)
     await session.commit()
-    await session.refresh(db_workflow)
-    return db_workflow
-
-
-
-async def read_workflow_single(session: AsyncSession, workflow_id: int) -> models.Workflow:
-    """Read single workflow from database
-
-    Args:
-        session (AsyncSession): Database session
-        workflow_id (int): Primary key of workflow
-
-    Returns:
-        models.Workflow: Workflow entry in database, if exists, or None
-    """
-    query = await session.execute(
-            select(models.Workflow)
-                .where(models.Workflow.id == workflow_id)
-        )
-    db_obj: Optional[models.Workflow] = query.scalars().first()
+    await session.refresh(db_obj)
     return db_obj
 
 
 
-async def read_workflow_multi(session: AsyncSession, offset: Optional[int]=0, limit: Optional[int]=100) -> List[models.Workflow]:
-    """Read multiple workflows from database
+async def read_generic(session: AsyncSession, obj_id: Any, model: Type[ModelType]) -> Optional[ModelType]:
+    """Read single object from database
 
     Args:
         session (AsyncSession): Database session
+        obj_id (Any): Primary key of object
+        model (Type[ModelType]): Database model type
+
+    Returns:
+        Optional[ModelType]: Database entry if exists, else None
+    """
+    query = await session.execute(
+            select(model)
+                .where(model.id == obj_id)
+        )
+    # Note the use of .scalars() to get ScarlarResult, i.e. Pydantic model, instead of Row object
+    db_obj: Optional[model] = query.scalars().first()
+    return db_obj
+
+
+
+async def read_multi_generic(session: AsyncSession, 
+                             model: Type[ModelType],
+                             offset: Optional[int]=0, 
+                             limit: Optional[int]=100,
+                             descending=False) -> List[models.Workflow]:
+    """Read multiple objects from database
+
+    Args:
+        session (AsyncSession): Database session
+        model (Type[ModelType]): Database model type
         offset (Optional[int], optional): Offset into database rows. Defaults to 0.
         limit (Optional[int], optional): Limit number of workflows returned. Defaults to 100.
 
     Returns:
-        List[models.Workflow]: List of workflow entries in database
+        List[models.Workflow]: List of entries in database
     """
-    # TODO: Optional order_by
-    result = await session.execute(
-            select(models.Workflow).order_by(models.Workflow.id.desc()).offset(offset).limit(limit)
-        )
+    # TODO: more elegant approach for sorting
+    if descending:
+        result = await session.execute(
+                select(model).order_by(model.id.desc()).offset(offset).limit(limit)
+            )
+    else:
+        result = await session.execute(
+                select(model).order_by(model.id).offset(offset).limit(limit)
+            )
     # Note the use of .scalars() to get ScarlarResult, i.e. Pydantic model, instead of Row object
-    db_obj_list: Optional[List[models.Workflow]] = result.scalars().all()
+    db_obj_list: Optional[List[model]] = result.scalars().all()
     return db_obj_list
 
 
@@ -180,7 +184,9 @@ async def update_workflow(session: AsyncSession, workflow: schemas.WorkflowUpdat
     update_data = workflow.dict(exclude_unset=True)
     
     if workflow.msg["level"] == "job_info":
-        await create_job(session=session, job=schemas.JobCreate(**{"workflow_id": workflow.id, **workflow.msg}))
+        await create_generic(session=session, 
+                             obj_in=schemas.JobCreate(**{"workflow_id": workflow.id, **workflow.msg}),
+                             model=models.Job)
     elif workflow.msg["level"] == "progress":
         db_obj = await update_object(db_obj, obj_data, update_data["msg"])
         setattr(db_obj, "status", "Running")

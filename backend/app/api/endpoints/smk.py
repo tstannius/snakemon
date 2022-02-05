@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db import crud, schemas
+from app.db import crud, models, schemas
 from app.api import dependencies as deps
 
 router = APIRouter()
@@ -29,7 +29,9 @@ async def create_workflow(
     # TODO: use forms properly, see: https://github.com/tiangolo/fastapi/issues/2387
     # data = await request.form() # TODO: use metadata
     # data = jsonable_encoder(data)
-    db_workflow = await crud.create_workflow(session, workflow=schemas.WorkflowCreate(workflow=workflow, name=name))
+    db_workflow = await crud.create_generic(session, 
+                                            obj_in=schemas.WorkflowCreate(workflow=workflow, name=name), 
+                                            model=models.Workflow)
     print(f"Creating workflow {db_workflow.workflow} with name {db_workflow.name}")
     return {"id": db_workflow.id}
 
