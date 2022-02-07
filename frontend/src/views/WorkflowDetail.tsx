@@ -57,8 +57,8 @@ export default function WorkflowDetail(): JSX.Element {
         <div id="WorkflowDetail" className="p-3">
             {/* <h1>Workflow #{workflowId} details</h1> */}
             <div id="WorkflowDetail-Header">
-                <h1>{workflow?.workflow}</h1>
-                <h3>{workflow?.name}</h3>
+                <span className="h2">{workflow?.workflow} / </span>
+                <span className="h2 fst-italic">{workflow?.name}</span>
             </div>
             <hr/>
 
