@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List, Optional
 
-from app.db import crud, schemas
+from app.db import crud, models, schemas
 from app.api import dependencies as deps
 
 router = APIRouter()
@@ -25,7 +25,11 @@ async def get_workflow_jobs(
     Returns:
         List[schemas.Job]: Workflow jobs
     """
-    jobs = await crud.read_workflow_jobs(session, workflow_id)
+    jobs = await crud.read_workflow_relation_generic(
+        session=session, 
+        foreign_key_id=workflow_id,
+        model=models.Job
+    )
 
     if not jobs:
         raise HTTPException(status_code=404, detail="Workflow or jobs not found")

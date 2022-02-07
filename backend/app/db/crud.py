@@ -35,57 +35,6 @@ async def update_object(obj: ModelType, obj_data: Dict[str, Any], update_data: D
 
 
 
-async def read_workflow_jobs(session: AsyncSession,  workflow_id: int) -> List[models.Job]:
-    """Read multiple jobs associated with workflow
-
-    Args:
-        session (AsyncSession): Database session
-        workflow_id (int): Primary key of workflow
-
-    Returns:
-        List[models.Job]: Jobs associated with given workflow
-    """
-    
-    result = await session.execute(
-            select(models.Job)
-                .where(models.Job.workflow_id == workflow_id)
-        )
-    # Note the use of .scalars() to get ScarlarResult, i.e. Pydantic model, instead of Row object
-    db_obj_list: Optional[List[models.Job]] = result.scalars().all()
-    
-    return db_obj_list
-
-
-
-async def update_job(session: AsyncSession, job: schemas.JobUpdate) -> models.Job:
-    """Update workflow job
-
-    Args:
-        session (AsyncSession): Database session
-        job (schemas.JobUpdate): Schema of updated data to apply in database
-
-    Returns:
-        models.Job: Updated database model object
-    """
-    query = await session.execute(
-            select(models.Job)
-                .where(models.Job.workflow_id == job.workflow_id)
-                .where(models.Job.jobid == job.jobid)
-        )
-    db_obj: Optional[models.Job] = query.scalars().first()
-    obj_data = jsonable_encoder(db_obj)
-    update_data = job.dict(exclude_unset=True)
-    
-    db_obj = await update_object(db_obj, obj_data, update_data)
-
-    session.add(db_obj)
-    await session.commit()
-    await session.refresh(db_obj)
-    
-    return db_obj
-
-
-
 async def create_generic(session: AsyncSession, 
                          obj_in: CreateSchemaType, 
                          model: Type[ModelType]) -> ModelType:
@@ -159,6 +108,60 @@ async def read_multi_generic(session: AsyncSession,
     # Note the use of .scalars() to get ScarlarResult, i.e. Pydantic model, instead of Row object
     db_obj_list: Optional[List[model]] = result.scalars().all()
     return db_obj_list
+
+
+
+async def read_workflow_relation_generic(session: AsyncSession, 
+                                foreign_key_id: Any,
+                                model: Type[ModelType]) -> Optional[ModelType]:
+    """Read objects related with given workflow
+
+    Args:
+        session (AsyncSession): Database session
+        foreign_key_id (Any): Primary key of workflow
+        model (Type[ModelType]): Database model type
+
+    Returns:
+        Optional[ModelType]: List of database objects of given model type
+    """
+   
+    result = await session.execute(
+            select(model)
+                .where(model.workflow_id == foreign_key_id)
+        )
+    # Note the use of .scalars() to get ScarlarResult, i.e. Pydantic model, instead of Row object
+    db_obj_list: Optional[List[model]] = result.scalars().all()
+    
+    return db_obj_list
+
+
+
+async def update_job(session: AsyncSession, job: schemas.JobUpdate) -> models.Job:
+    """Update workflow job
+
+    Args:
+        session (AsyncSession): Database session
+        job (schemas.JobUpdate): Schema of updated data to apply in database
+
+    Returns:
+        models.Job: Updated database model object
+    """
+    query = await session.execute(
+            select(models.Job)
+                .where(models.Job.workflow_id == job.workflow_id)
+                .where(models.Job.jobid == job.jobid)
+        )
+    db_obj: Optional[models.Job] = query.scalars().first()
+    obj_data = jsonable_encoder(db_obj)
+    update_data = job.dict(exclude_unset=True)
+    
+    db_obj = await update_object(db_obj, obj_data, update_data)
+
+    session.add(db_obj)
+    await session.commit()
+    await session.refresh(db_obj)
+    
+    return db_obj
 
 
 
