@@ -17,6 +17,7 @@ class Workflow(Base):
     timestamp = Column(String(30))
     
     jobs = relationship("Job", back_populates="workflow") # type: ignore
+    comments = relationship("Comment")
 
     def __init__(self, workflow, name):
         self.workflow = workflow
