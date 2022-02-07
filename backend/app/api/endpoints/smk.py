@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi.encoders import jsonable_encoder
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db import crud, models, schemas
@@ -27,12 +28,14 @@ async def create_workflow(
         id: primary key of newly created workflow
     """
     # TODO: use forms properly, see: https://github.com/tiangolo/fastapi/issues/2387
-    # data = await request.form() # TODO: use metadata
-    # data = jsonable_encoder(data)
+    print(f"Creating workflow from data")
+    data = await request.form() # TODO: use metadata
+    data = jsonable_encoder(data)
+    print(data)
     db_workflow = await crud.create_generic(session, 
                                             obj_in=schemas.WorkflowCreate(workflow=workflow, name=name), 
                                             model=models.Workflow)
-    print(f"Creating workflow {db_workflow.workflow} with name {db_workflow.name}")
+    # snakemake only expects id in return
     return {"id": db_workflow.id}
 
 
