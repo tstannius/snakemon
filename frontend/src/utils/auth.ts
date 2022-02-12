@@ -2,7 +2,9 @@ import { apiUrl } from '../env';
 
 
 
-const authProvider = {
+const APIauthProvider = {
+  isAuthenticated: false,
+
   async TestToken() {
     const request = new Request(`${apiUrl}/auth/test-token`, {
       method: 'POST',
@@ -15,6 +17,7 @@ const authProvider = {
       } else if (response.status === 500) {
         throw new Error('Internal server error');
       } else if (response.status > 400 && response.status < 500) {
+        APIauthProvider.isAuthenticated = false;
         return null
       }
     })
@@ -23,7 +26,7 @@ const authProvider = {
       if ((data != null) && ('username' in data)) {
           username = data.username;
       }
-    
+      APIauthProvider.isAuthenticated = true;
       return username;
     })
     .catch((error) => {
@@ -64,6 +67,7 @@ const authProvider = {
       .catch((error) => {
         throw new Error(error);
       });
+      APIauthProvider.isAuthenticated = true;
       return response;
     },
 
@@ -84,10 +88,17 @@ const authProvider = {
       .catch((error) => {
         throw new Error(error);
       });
-      return response;
 
+      APIauthProvider.isAuthenticated = false;
+      return response;
+    },
+
+    
+    async signout(callback: VoidFunction) {
+      APIauthProvider.Signout();
+      callback();
     }
 };
 
 
-export { authProvider };
+export { APIauthProvider };

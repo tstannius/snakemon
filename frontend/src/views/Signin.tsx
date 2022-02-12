@@ -6,42 +6,38 @@ import Alert from 'react-bootstrap/Alert'
 import Button from 'react-bootstrap/Button'
 import Form from 'react-bootstrap/Form';
 
-import { authProvider } from "../utils/auth";
 import { Logo } from "../components";
+import { useAuth } from "../hooks"
 
 
 
-export default function Signin(props: any): JSX.Element {
+export default function Signin(): JSX.Element {
     const [username, setUsername] = useState<string>("");
     const [password, setPassword] = useState<string>("");
     const [validated, setValidated] = useState<boolean>(false);
     const [warning, setWarning] = useState<string>("");
     let navigate = useNavigate();
+    let auth = useAuth();
 
     function handleSubmit(event: React.SyntheticEvent) {
         // manually prevent reload page on submit, as
         // this will clear the warning if login creds invalid
         event.preventDefault();
         const form = (event.currentTarget as HTMLFormElement);
-        
+        // TODO: use submission as done in react router tutorial:
+        // https://stackblitz.com/github/remix-run/react-router/tree/main/examples/auth?file=src/App.tsx
         if (form.checkValidity() === false) {
             event.stopPropagation();
         } else {
-            authProvider.Signin(username, password)
-                .then((response) => {
-                    if (response.status === 200) {
-                        authProvider.TestToken().then((result) => {
-                            props.setUser(result);
-                        });
-                        navigate("/"); // TODO: more elegant redirect and history
-                    } else if ((response.status >= 400) && (response.status <= 500)) {
-                        response.json()
-                            .then(data => {
-                                setWarning(data.detail)
-                                setPassword("")
-                            })
-                    }
-                });
+            // signin with callbackSuccess and callbackError
+            auth.signin(
+                username, 
+                password, 
+                () => {navigate("/")}, 
+                (msg: string) => {
+                    setWarning(msg);
+                    setPassword("");
+            })
         }
         setValidated(true);
     }

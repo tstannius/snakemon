@@ -6,12 +6,13 @@ import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 
 import Logo from "./Logo";
-import { authProvider } from "../utils/auth";
+import { useAuth } from "../hooks"
 
 
 
-function NavBar(props: any): JSX.Element {
+function NavBar(): JSX.Element {
     let navigate = useNavigate();
+    let auth = useAuth()
 
     return (
       <div>
@@ -42,18 +43,15 @@ function NavBar(props: any): JSX.Element {
               <Navbar.Collapse className="justify-content-end">
                   {/* conditionally show sign in / sign up */}
                   {/* conditionally show logged in as */}
-                  { props.user ?
+                  { auth.user ?
                     <div id ="ProfileNavbar-loggedIn">
                       {/* TODO: Show photo */}
                       <span className="align-middle text-center p-2">
-                        Hello, {props.user}!
+                        Hello, {auth.user}!
                       </span>
                       <button className="btn btn-link" style={{"color": "var(--sm-green-dark"}}
                         onClick={() => {
-                          // TODO authprovider should handle setUser too
-                          authProvider.Signout();
-                          props.setUser(null);
-                          navigate("/");
+                          auth.signout(() => navigate("/"))
                         }}>
                         Sign out
                       </button>
