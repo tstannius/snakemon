@@ -124,13 +124,21 @@ async def read_workflow_relation_generic(session: AsyncSession,
     Returns:
         Optional[ModelType]: List of database objects of given model type
     """
-   
-    result = await session.execute(
-            select(model)
-                .where(model.workflow_id == foreign_key_id)
-        )
-    # Note the use of .scalars() to get ScarlarResult, i.e. Pydantic model, instead of Row object
-    db_obj_list: Optional[List[model]] = result.scalars().all()
+    # check that workflow exists
+    workflow_obj = await read_generic(session, foreign_key_id, models.Workflow)
+    
+    # default return value
+    db_obj_list: Optional[List[model]] = None
+    
+    # if workflow exists, do the query, which may return empty list
+    # else we return None for no workflow found
+    if workflow_obj:
+        result = await session.execute(
+                select(model)
+                    .where(model.workflow_id == foreign_key_id)
+            )
+        # Note the use of .scalars() to get ScarlarResult, i.e. Pydantic model, instead of Row object
+        db_obj_list: Optional[List[model]] = result.scalars().all()
     
     return db_obj_list
 

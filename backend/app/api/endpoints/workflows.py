@@ -100,7 +100,9 @@ async def get_workflow_comments(
         model=models.Comment
     )
 
-    if not db_objs:
-        raise HTTPException(status_code=404, detail="Workflow or jobs not found")
+    # None if workflow not exists, 
+    # empty list if exists, but no comments
+    if db_objs is None:
+        raise HTTPException(status_code=404, detail="Workflow not found")
     
     return [jsonable_encoder(j) for j in db_objs]
