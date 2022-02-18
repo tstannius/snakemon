@@ -29,4 +29,4 @@ app.include_router(api_router)
 
 @app.get("/")
 async def root():
-    return {"message": "Hello from FastAPI backend!"}
+    return {"message": "Hello from SnakeMon backend!"}
