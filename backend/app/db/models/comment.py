@@ -11,14 +11,15 @@ class Comment(Base):
     
     # relationships
     # don't delete on cascade, as comments should remain
-    username = Column(Integer, ForeignKey('user.username'))
-    # n.b. no need for back_populates="comments" for now
+    user_id = Column(Integer, ForeignKey('user.id'), nullable=False)
+    # user = relationship("User", back_populates="comments") # type: ignore
     user = relationship("User") # type: ignore
+    
     workflow_id = Column(Integer, ForeignKey("workflow.id", ondelete="CASCADE"))
     workflow = relationship("Workflow", back_populates="comments")
 
-    def __init__(self, workflow_id: int, username: str, content: str):
+    def __init__(self, workflow_id: int, user_id: str, content: str):
         self.content = content
         self.created_at = datetime.now()
-        self.username = username
+        self.user_id = user_id
         self.workflow_id = workflow_id

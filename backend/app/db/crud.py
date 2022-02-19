@@ -84,7 +84,7 @@ async def read_multi_generic(session: AsyncSession,
                              model: Type[ModelType],
                              offset: Optional[int]=0, 
                              limit: Optional[int]=100,
-                             descending=False) -> List[models.Workflow]:
+                             descending=False) -> List[Type[ModelType]]:
     """Read multiple objects from database
 
     Args:
@@ -94,7 +94,7 @@ async def read_multi_generic(session: AsyncSession,
         limit (Optional[int], optional): Limit number of workflows returned. Defaults to 100.
 
     Returns:
-        List[models.Workflow]: List of entries in database
+        List[Type[ModelType]]: List of entries in database
     """
     # TODO: more elegant approach for sorting
     if descending:
@@ -111,34 +111,82 @@ async def read_multi_generic(session: AsyncSession,
 
 
 
-async def read_workflow_relation_generic(session: AsyncSession, 
+async def read_relation_generic(session: AsyncSession, 
+                                model_from: Type[ModelType],
+                                foreign_key_name: str,
                                 foreign_key_id: Any,
-                                model: Type[ModelType]) -> Optional[ModelType]:
-    """Read objects related with given workflow
+                                model_foreign: Type[ModelType]) -> Optional[List[ModelType]]:
+    """Read objects related with a given model
+    
+    E.g. get comments (model_from) related to a specific workflow (model_foreign)
 
     Args:
         session (AsyncSession): Database session
+        model_from (Type[ModelType]): Database model type
+        foreign_key_name (str): Name of foreign key column
         foreign_key_id (Any): Primary key of workflow
-        model (Type[ModelType]): Database model type
+        model_foreign (Type[ModelType]): Foreign database model type
+
+    Returns:
+        Optional[List[Type[ModelType]]]: List of database objects of given model type
+    """
+    # check that foreign obj exists
+    obj_foreign = await read_generic(session, foreign_key_id, model_foreign)
+    
+    # default return value
+    db_obj_list: Optional[List[model_from]] = None
+    
+    # if obj_foreign exists, do the query, which may return empty list
+    # else we return None for no obj_foreign found
+    if obj_foreign:
+        result = await session.execute(
+                select(model_from)
+                    .where(getattr(model_from, foreign_key_name) == foreign_key_id)
+            )
+        # Note the use of .scalars() to get ScarlarResult, i.e. Pydantic model, instead of Row object
+        db_obj_list: Optional[List[model_from]] = result.scalars().all()
+    
+    return db_obj_list
+
+
+
+async def read_owned_relation_generic(session: AsyncSession, 
+                                model_from: Type[ModelType],
+                                foreign_key_name: str,
+                                foreign_key_id: Any,
+                                model_foreign: Type[ModelType]) -> Optional[ModelType]:
+    """Read objects related with a given model and a user
+    
+    E.g. get comments (model_from), inlcluding user, related to a specific workflow (model_foreign)
+
+    Args:
+        session (AsyncSession): Database session
+        model_from (Type[ModelType]): Database model type
+        foreign_key_name (str): Name of foreign key column
+        foreign_key_id (Any): Primary key of workflow
+        model_foreign (Type[ModelType]): Foreign database model type
 
     Returns:
         Optional[ModelType]: List of database objects of given model type
     """
-    # check that workflow exists
-    workflow_obj = await read_generic(session, foreign_key_id, models.Workflow)
+    # check that foreign obj exists
+    obj_foreign = await read_generic(session, foreign_key_id, model_foreign)
     
     # default return value
-    db_obj_list: Optional[List[model]] = None
+    db_obj_list: Optional[List[model_from]] = None
     
-    # if workflow exists, do the query, which may return empty list
-    # else we return None for no workflow found
-    if workflow_obj:
-        result = await session.execute(
-                select(model)
-                    .where(model.workflow_id == foreign_key_id)
-            )
-        # Note the use of .scalars() to get ScarlarResult, i.e. Pydantic model, instead of Row object
-        db_obj_list: Optional[List[model]] = result.scalars().all()
+    # if obj_foreign exists, do the query, which may return empty list
+    # else we return None for no obj_foreign found
+    if obj_foreign:
+        stmt = (select(model_from, models.User)
+                    .join(models.User, models.User.id == getattr(model_from, "user_id"))
+                    .where(getattr(model_from, foreign_key_name) == foreign_key_id)
+                    )
+        
+        result = await session.execute(stmt)
+        
+        # We don't use .scalars(), as it will only return the first database model
+        db_obj_list: Optional[List[(model_from, Any)]] = result.all()
     
     return db_obj_list
 
@@ -232,4 +280,60 @@ async def update_workflow(session: AsyncSession, workflow: schemas.WorkflowUpdat
     await session.commit()
     await session.refresh(db_obj)
     
+    return db_obj
+
+
+
+async def delete_generic(session: AsyncSession, obj_id: Any, model: Type[ModelType]) -> Optional[ModelType]:
+    """Delete single object from database
+
+    Args:
+        session (AsyncSession): Database session
+        obj_id (Any): Primary key of object
+        model (Type[ModelType]): Database model type
+
+    Returns:
+        Optional[ModelType]: Database entry if exists, else None
+    """
+    query = await session.execute(
+        select(model)
+            .where(model.id == obj_id)
+    )
+    # Note the use of .scalars() to get ScarlarResult, i.e. Pydantic model, instead of Row object
+    db_obj: Optional[model] = query.scalars().first()
+    # TODO: why does this one send back user id?
+    if db_obj:
+        await session.delete(db_obj)
+        await session.commit()
+    
+    return db_obj
+
+
+
+async def delete_owned_generic(session: AsyncSession, obj_id: Any, user_id: Any, model: Type[ModelType]) -> Optional[ModelType]:
+    """Delete single object from database
+
+    Args:
+        session (AsyncSession): Database session
+        obj_id (Any): Primary key of object
+        user_id (Any): Primary key of owner of object
+        model (Type[ModelType]): Database model type
+
+    Returns:
+        Optional[ModelType]: Database entry if exists, else None
+    """
+    # TODO: scope dependent deletion, e.g. to have super users
+    stmt = (select(model)
+            .where(model.id == obj_id, model.user_id == user_id))
+    query = await session.execute(stmt)
+    
+    # Note the use of .scalars() to get ScarlarResult, i.e. Pydantic model, instead of Row object
+    db_obj: Optional[model] = query.scalars().first()
+    
+    # TODO: why does this one send back user id?
+    if db_obj:
+        await session.delete(db_obj)
+        await session.commit()
+    
+    # Note the use of .scalars() to get ScarlarResult, i.e. Pydantic model, instead of Row object
     return db_obj

@@ -25,10 +25,12 @@ async def get_workflow_jobs(
     Returns:
         List[schemas.Job]: Workflow jobs
     """
-    jobs = await crud.read_workflow_relation_generic(
-        session=session, 
+    jobs = await crud.read_relation_generic(
+        session=session,
+        model_from=models.Job,
+        foreign_key_name="workflow_id",
         foreign_key_id=workflow_id,
-        model=models.Job
+        model_foreign=models.Workflow
     )
 
     if not jobs:

@@ -78,14 +78,19 @@ async def create_comment(
     """
     obj_in = schemas.CommentCreate(
                     workflow_id=workflow_id,
-                    username=user.username,
-                    **comment.dict())
+                    user_id=user.id,
+                    content=comment.content)
     
     db_obj = await crud.create_generic(session, 
                                         obj_in=obj_in, 
                                         model=models.Comment)
     
-    return db_obj
+    if db_obj is None:
+        raise HTTPException(status_code=404, detail="Could not create comment")
+    
+    response = jsonable_encoder(db_obj)
+    response["username"] = user.username # TODO: get from db
+    return response
 
 
 
@@ -94,10 +99,12 @@ async def get_workflow_comments(
             workflow_id: int,
             session: AsyncSession = Depends(deps.get_session)):
     
-    db_objs = await crud.read_workflow_relation_generic(
+    db_objs = await crud.read_owned_relation_generic(
         session=session,
+        model_from=models.Comment,
+        foreign_key_name="workflow_id",
         foreign_key_id=workflow_id,
-        model=models.Comment
+        model_foreign=models.Workflow
     )
 
     # None if workflow not exists, 
@@ -105,4 +112,37 @@ async def get_workflow_comments(
     if db_objs is None:
         raise HTTPException(status_code=404, detail="Workflow not found")
     
-    return [jsonable_encoder(j) for j in db_objs]
+    response = [{**jsonable_encoder(obj[0]), "username": obj[1].username} for obj in db_objs]
+    return response
+
+# TODO: update
+
+@router.delete("/comments", status_code=status.HTTP_200_OK)
+async def delete_comment(
+            comment_id: int,
+            user: models.User = Depends(deps.get_current_user),
+            session: AsyncSession = Depends(deps.get_session)):
+    """Delete comment
+
+    Args:
+        comment_id (int): id / primary key of comment
+        user (models.User, optional): User posting comment. Defaults to Depends(deps.get_current_user).
+        session (AsyncSession, optional): Database session. Defaults to Depends(deps.get_session).
+
+    Returns:
+        schemas.Comment: Deleted comment
+    """  
+    db_obj = await crud.delete_owned_generic(
+                            session=session, 
+                            obj_id=comment_id, 
+                            user_id=user.id, 
+                            model=models.Comment)
+    
+    if db_obj is None:
+        raise HTTPException(status_code=404, detail="Comment not found")
+    
+    response = jsonable_encoder(db_obj)
+    response["username"] = user.username
+    from pprint import pprint
+    pprint(response)
+    return response
