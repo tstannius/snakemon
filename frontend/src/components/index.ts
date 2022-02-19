@@ -1,8 +1,9 @@
-import Comment from "./Comment"
-import CommentCreate from "./CommentCreate"
-import CommentList from "./CommentList"
+import Comment from "./Comment";
+import CommentCreate from "./CommentCreate";
+import CommentList from "./CommentList";
 import Logo from "./Logo";
 import NavBar from "./NavBar";
+import WorkflowDetail from "./WorkflowDetail";
 import WorkflowsTable from "./WorkflowsTable";
 
 export { 
@@ -11,5 +12,6 @@ export {
     CommentList,
     Logo, 
     NavBar, 
+    WorkflowDetail,
     WorkflowsTable 
 };

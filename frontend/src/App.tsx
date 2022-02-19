@@ -8,7 +8,7 @@ import {
   Signin,
   Signup,
   Test,
-  WorkflowDetail,
+  Workflow,
   Workflows
 } from "./views";
 import { NavBar } from './components'
@@ -24,7 +24,7 @@ export default function App(): JSX.Element {
           <Route index element={<Home />} /> {/* note only home has index */}
           <Route path="/workflows" element={<Workflows />} />
             {/* TODO: consider other placement */}
-            <Route path="/workflows/:workflowId" element={<WorkflowDetail />} />
+            <Route path="/workflows/:workflowId" element={<Workflow />} />
           <Route path="/signin" element={<Signin />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/test" element={<Test />} />
