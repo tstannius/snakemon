@@ -20,7 +20,7 @@ async def main() -> None:
     async with async_session() as session:
         # add test user if dev env
         if (settings.ENVIRONMENT == "DEV"):
-            logging.warn("[WARNING]: Dev environment detected. Creating dev data.")
+            logging.warning("[WARNING]: Dev environment detected. Creating dev data.")
             new_user = User(
                 email="john.doe@snakemon.org",
                 username="jd",
