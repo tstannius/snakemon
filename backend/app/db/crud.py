@@ -192,6 +192,17 @@ async def read_owned_relation_generic(session: AsyncSession,
 
 
 
+async def read_job_stats(session: AsyncSession, workflow_id) -> Dict[str, int]:
+    query = await session.execute(
+            select(models.Job.status)
+                .where(models.Job.workflow_id == workflow_id)
+        )
+    # Note the use of .scalars() to get ScarlarResult, i.e. Pydantic model, instead of Row object
+    db_obj: Optional[List[str]] = query.scalars().all()
+    return db_obj
+
+
+
 async def update_job(session: AsyncSession, job: schemas.JobUpdate) -> models.Job:
     """Update workflow job
 
@@ -251,7 +262,7 @@ async def update_workflow(session: AsyncSession, workflow: schemas.WorkflowUpdat
         setattr(db_obj, "status", "Running")
         if db_obj.done == db_obj.total:
             setattr(db_obj, "completed_at", datetime.now())
-            setattr(db_obj, "status", "Done")
+            setattr(db_obj, "status", "Done") # TODO: use enum for status
     elif workflow.msg["level"] == "job_finished":
         await update_job(session, job=schemas.JobUpdate(**{"jobid": workflow.msg["jobid"],
                                                            "workflow_id": workflow.id, 
