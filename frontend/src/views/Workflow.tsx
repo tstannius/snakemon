@@ -3,7 +3,11 @@ import { useNavigate, useParams } from "react-router-dom";
 
 import { apiUrl } from '../env';
 
-import { CommentList, WorkflowDetail } from "../components"
+import { 
+    CommentList,
+    JobsOverview, 
+    WorkflowDetail 
+    } from "../components"
 import { IWorkflow } from "../interfaces"
 
 
@@ -65,7 +69,7 @@ export default function Workflow(): JSX.Element {
                     <div className="card">
                         <div className="card-body">
                             <h5 className="card-title">Jobs</h5>
-                            <p>Jobs</p>
+                            <JobsOverview />
                         </div>
                     </div>
                 </div>
