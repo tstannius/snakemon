@@ -27,7 +27,6 @@ export function FilterButtonGroup(props: IFilterButtonGroup) {
     const handleChange = (val: Array<string>) => {
         // call the parent set hook with new value
         // props.callbackUpdateFilters(val)
-        console.log(val)
         const jobsFiltersBase = CreateJobsFilters();
         if (!filtering && (val.length === (jobsFiltersBase.length - 1))) {
             const diff = jobsFiltersBase.filter(x => !val.includes(x));
@@ -53,7 +52,7 @@ export function FilterButtonGroup(props: IFilterButtonGroup) {
     }
 
     return (
-        <div>
+        <div className="text-nowrap">
             <ToggleButtonGroup type="checkbox" value={props.jobsFilters} onChange={handleChange}>
                 <Button id="btn-filter" variant="" className="btn-secondary" onClick={setFilters}>
                     {filtering ?
