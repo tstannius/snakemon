@@ -22,3 +22,52 @@
   justify-content: center;
   align-items: center;
 }
+
+/* base, unchecked, darker */
+.btn-filter {
+  color: white;
+  filter: brightness(80%);
+  text-align: center !important;
+}
+
+/* checked, active, colorful */
+.btn-check:active + .btn-filter, .btn-check:checked + .btn-filter, .btn-filter.active, .btn-filter:active {
+  filter: brightness(100%);
+}
+
+/* hover, in between colorful and darker */
+.btn-filter:hover {
+  filter: brightness(90%) !important;
+  color: white;
+}
+
+/* colored buttons */
+.btn-filter.pending {
+  background-color: deeppink;
+  border-color: deeppink;
+}
+
+.btn-filter.submitted {
+  background-color: darkviolet;
+  border-color: darkviolet;
+}
+
+.btn-filter.running {
+  background-color: blue;
+  border-color: blue;
+}
+
+.btn-filter.error {
+  background-color: orange;
+  border-color: orange;
+}
+
+.btn-filter.failed {
+  background-color: red;
+  border-color: red;
+}
+
+.btn-filter.succeeded {
+  background-color: limegreen;
+  border-color: limegreen;
+}
