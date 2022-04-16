@@ -42,7 +42,7 @@ export function FilterButtonGroup(props: IFilterButtonGroup) {
     };
 
     const setFilters = () => {
-        if (props.jobsFilters.length == 0) {
+        if (props.jobsFilters.length === 0) {
             props.callbackUpdateFilters(CreateJobsFilters());
             setFiltering(false);
         } else {
