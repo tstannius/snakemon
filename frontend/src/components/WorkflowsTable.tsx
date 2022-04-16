@@ -1,19 +1,22 @@
-import { Column, usePagination, useSortBy, useTable } from 'react-table';
-import { Badge, Form, Pagination, Table} from 'react-bootstrap';
+import React, { useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
+import { Column, usePagination, useSortBy, useTable } from 'react-table';
+
+import { Badge, Form, Pagination, Table} from 'react-bootstrap';
 
 interface IWorklowsTableProps {
     columns: Array<Column>,
     data: Array<any>,
+    callbackFetchData: (pageIndex: number, pageSize: number) => void,
+    skipPageResetRef: React.MutableRefObject<boolean>
+    controlledPageCount: number,
+    loading: boolean, // TODO: add fancy loading indicator with fade
   }
+
 function WorkflowsTable(props: IWorklowsTableProps): JSX.Element {
     // Makes a react-table table via useTable, see:
     // see https://react-table.tanstack.com/docs/api/useTable
     let navigate = useNavigate();
-  
-    // useTable complains if accessing via props. so we load into constants
-    const columns = props.columns
-    const data = props.data
   
     // Use the state and functions returned from useTable to build your UI
     const {
@@ -31,18 +34,39 @@ function WorkflowsTable(props: IWorklowsTableProps): JSX.Element {
       nextPage,
       previousPage,
       setPageSize,
+      // Get the state from the instance
       state: { pageIndex, pageSize },
     } = useTable(
       {
-        columns,
-        data,
+        columns: props.columns,
+        data: props.data,
         initialState: { pageIndex: 0 },
+        // Tell the usePagination
+        // hook that we'll handle our own data fetching
+        // This means we'll also have to provide our own
+        // pageCount.
+        manualPagination: true,
+        pageCount: props.controlledPageCount,
+        // stop auto updating anything when fetching data
+        // cf. react-table.tanstack.com/docs/faq#how-do-i-stop-my-table-state-from-automatically-resetting-when-my-data-changes
+        autoResetPage: !props.skipPageResetRef.current,
+        autoResetExpanded: !props.skipPageResetRef.current,
+        autoResetGroupBy: !props.skipPageResetRef.current,
+        autoResetSelectedRows: !props.skipPageResetRef.current,
+        autoResetSortBy: !props.skipPageResetRef.current,
+        autoResetFilters: !props.skipPageResetRef.current,
+        autoResetRowState: !props.skipPageResetRef.current,
       },
     useSortBy,
     usePagination
     )
+
+    // Listen for changes in pagination and use the state to fetch our new data
+    useEffect(() => {
+      props.callbackFetchData(pageIndex, pageSize);
+    }, [props.callbackFetchData, pageIndex, pageSize]);
   
-    // Render the UI for your table
+    // Render the table UI
     return (
       <>
       {/* apply the table props */}
@@ -147,6 +171,7 @@ function WorkflowsTable(props: IWorklowsTableProps): JSX.Element {
           <Pagination.First onClick={() => gotoPage(0)} disabled={!canPreviousPage}/>
           <Pagination.Prev onClick={() => previousPage()} disabled={!canPreviousPage}/>
         <input
+            className="text-center"
             // type="number"
             defaultValue={pageIndex + 1}
             onChange={e => {
