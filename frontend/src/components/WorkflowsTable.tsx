@@ -1,15 +1,16 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
-import { Column, usePagination, useSortBy, useTable } from 'react-table';
+import { Column, useAsyncDebounce, useFilters, usePagination, useSortBy, useTable } from 'react-table';
 
 import { Badge, Form, Pagination, Table} from 'react-bootstrap';
 
 interface IWorklowsTableProps {
     columns: Array<Column>,
     data: Array<any>,
-    callbackFetchData: (pageIndex: number, pageSize: number) => void,
+    callbackFetchData: (pageIndex: number, pageSize: number, searchString: string) => void,
     skipPageResetRef: React.MutableRefObject<boolean>
     controlledPageCount: number,
+    searchString: string,
     loading: boolean, // TODO: add fancy loading indicator with fade
   }
 
@@ -40,7 +41,7 @@ function WorkflowsTable(props: IWorklowsTableProps): JSX.Element {
       {
         columns: props.columns,
         data: props.data,
-        initialState: { pageIndex: 0 },
+        initialState: { pageIndex: 0, pageSize: 30 },
         // Tell the usePagination
         // hook that we'll handle our own data fetching
         // This means we'll also have to provide our own
@@ -56,22 +57,29 @@ function WorkflowsTable(props: IWorklowsTableProps): JSX.Element {
         autoResetSortBy: !props.skipPageResetRef.current,
         autoResetFilters: !props.skipPageResetRef.current,
         autoResetRowState: !props.skipPageResetRef.current,
+        // manual filtering for server side filtering
+        // manualFilters: true,
+        searchString: props.searchString
       },
+    useFilters,
     useSortBy,
-    usePagination
+    usePagination,
     )
 
-    // Listen for changes in pagination and use the state to fetch our new data
+    // Debounce our onFetchData call for 100ms
+   const onFetchDataDebounced = useAsyncDebounce(props.callbackFetchData, 200)
+
+    // Listen for changes in pagination or searchString and use the state to fetch our new data
     useEffect(() => {
-      props.callbackFetchData(pageIndex, pageSize);
-    }, [props.callbackFetchData, pageIndex, pageSize]);
+      onFetchDataDebounced(pageIndex, pageSize, props.searchString );
+    }, [onFetchDataDebounced, pageIndex, pageSize, props.searchString ]);
   
     // Render the table UI
     return (
       <>
       {/* apply the table props */}
-      <div style={{minHeight: "460px", verticalAlign: "top"}}>
-      <Table hover {...getTableProps()}>
+      <div id="WorkflowsTableContainer" style={{verticalAlign: "top"}}>
+      <Table id="WorkflowsTable" hover responsive {...getTableProps()}>
         <thead>
           {// Loop over the header rows
           headerGroups.map(headerGroup => (

@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect, useRef, useState, useMemo } from 'react';
-import Button from 'react-bootstrap/Button';
 import InputGroup from "react-bootstrap/InputGroup"
 import Form from 'react-bootstrap/Form';
 import FormControl from 'react-bootstrap/FormControl';
@@ -17,9 +16,13 @@ export default function Workflows(): JSX.Element {
 
   const [searchString, setSearchString] = useState<string>("");
 
+  const handleChangeSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchString(e.currentTarget.value);
+  }
+
   // This will get called when the table needs new data
   // useCallback ensures a new function is not generated
-  const fetchData = useCallback((pageIndex: number, pageSize: number): void => {
+  const fetchData = useCallback((pageIndex: number, pageSize: number, searchString: string): void => {
     // set ref to prevent page reset
     // cf. react-table.tanstack.com/docs/faq#how-do-i-stop-my-table-state-from-automatically-resetting-when-my-data-changes
     skipPageResetRef.current = true;
@@ -31,17 +34,27 @@ export default function Workflows(): JSX.Element {
 
     if (fetchId === fetchIdRef.current) {
       const startRow = pageSize * pageIndex;
-      const endRow = startRow + pageSize;
 
-      // query API
-      // TODO: add as parameters offset, limit, sorting, search string
-      fetch(`${apiUrl}/workflows/`, { method: "GET", mode: "cors" })
+      const params = new URLSearchParams({
+        offset: startRow.toString(),
+        limit: pageSize.toString()
+      })
+      
+      if (searchString) {
+        params.append("query", searchString.trim())
+      }
+        
+      // leading '?' query parameters
+      const searchParams = "?" + params.toString();
+
+      // set query params like so: https://stackoverflow.com/questions/35038857/setting-query-string-using-fetch-get-request
+      fetch(`${apiUrl}/workflows` + searchParams,
+        { method: "GET", mode: "cors" })
         .then(response => response.json())
         .then(data => {
-          // TODO: server should handle slice
-          setWorkflowsData(data.slice(startRow, endRow));
-          // TODO: server must send back total page count.
-          setPageCount(Math.ceil(data.length / pageSize));
+          // server handles slice and calculates total page count
+          setWorkflowsData(data.workflows);
+          setPageCount(data.page_count);
         });
       setLoading(false);
     }
@@ -105,11 +118,7 @@ export default function Workflows(): JSX.Element {
                                   type="text"
                                   placeholder="Search ..."
                                   value={searchString}
-                                  // TODO: consider if this inline func is inefficient
-                                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                                      setSearchString(e.currentTarget.value);
-                                  }
-                                  }
+                                  onChange={handleChangeSearch}
                               />
                           </InputGroup>
                       </Form>
@@ -121,9 +130,9 @@ export default function Workflows(): JSX.Element {
             callbackFetchData={fetchData}
             skipPageResetRef={skipPageResetRef}
             controlledPageCount={pageCount}
+            searchString={searchString}
             loading={loading}
             />
-          <Button onClick={() => console.log(searchString)}>Console log</Button>
         </div>
       </div>
     </div>
