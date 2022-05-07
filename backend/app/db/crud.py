@@ -135,13 +135,15 @@ async def read_multi_workflows(session: AsyncSession,
         stmt_select = stmt_select.where(
                 or_(
                     models.Workflow.name.ilike(f"%{query}%"), 
-                    models.Workflow.workflow.ilike(f"%{query}%")
+                    models.Workflow.workflow.ilike(f"%{query}%"),
+                    models.Workflow.status.ilike(f"%{query}%")
                 )
             )
         stmt_count = stmt_count.where(
                 or_(
                     models.Workflow.name.ilike(f"%{query}%"), 
-                    models.Workflow.workflow.ilike(f"%{query}%")
+                    models.Workflow.workflow.ilike(f"%{query}%"),
+                    models.Workflow.status.ilike(f"%{query}%")
                 )
             )
     
