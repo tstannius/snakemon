@@ -2,7 +2,7 @@
 """
 # TODO do type ignore in mypy config, see https://mypy.readthedocs.io/en/stable/running_mypy.html#missing-type-hints-for-third-party-library
 from sqlalchemy.orm import Session # type: ignore
-from sqlalchemy import select # type: ignore
+from sqlalchemy import func, or_, select # type: ignore
 from sqlalchemy.ext.asyncio import AsyncSession # type: ignore
 from fastapi.encoders import jsonable_encoder
 from typing import Any, Dict, List, Optional, Type, TypeVar, Union
@@ -15,7 +15,8 @@ ModelType = TypeVar("ModelType", bound=models.Base)
 CreateSchemaType = TypeVar("CreateSchemaType", bound=BaseModel)
 UpdateSchemaType = TypeVar("UpdateSchemaType", bound=BaseModel)
 
-
+# TODO:
+# - Decide on strategy to minimize code duplication, e.g. OOP, decorators
 
 async def update_object(obj: ModelType, obj_data: Dict[str, Any], update_data: Dict[str, Any]) -> ModelType:
     """Update database object utility function
@@ -96,18 +97,65 @@ async def read_multi_generic(session: AsyncSession,
     Returns:
         List[Type[ModelType]]: List of entries in database
     """
-    # TODO: more elegant approach for sorting
-    if descending:
-        result = await session.execute(
-                select(model).order_by(model.id.desc()).offset(offset).limit(limit)
-            )
-    else:
-        result = await session.execute(
-                select(model).order_by(model.id).offset(offset).limit(limit)
-            )
+    sort_column = model.id.desc() if descending else model.id
+    stmt = select(model).order_by(sort_column).offset(offset).limit(limit)
+    result = await session.execute(stmt)
+    
     # Note the use of .scalars() to get ScarlarResult, i.e. Pydantic model, instead of Row object
     db_obj_list: Optional[List[model]] = result.scalars().all()
     return db_obj_list
+
+
+
+async def read_multi_workflows(session: AsyncSession, 
+                             model: Type[ModelType],
+                             offset: Optional[int]=0, 
+                             limit: Optional[int]=100,
+                             query: Optional[str]=None,
+                             descending=False) -> List[Type[ModelType]]:
+    """Read multiple objects from database
+
+    Args:
+        session (AsyncSession): Database session
+        model (Type[ModelType]): Database model type
+        offset (Optional[int], optional): Offset into database rows. Defaults to 0.
+        limit (Optional[int], optional): Limit number of workflows returned. Defaults to 100.
+        query (Optional[str], optional): Global search query across columns
+
+    Returns:
+        List[Type[ModelType]]: List of entries in database
+    """
+    # determine sorting direction
+    sort_column = model.id.desc() if descending else model.id
+    stmt_select = select(model).order_by(sort_column)
+    stmt_count = select(func.count(model.id))
+    
+    # add search query term if any
+    if query:
+        stmt_select = stmt_select.where(
+                or_(
+                    models.Workflow.name.ilike(f"%{query}%"), 
+                    models.Workflow.workflow.ilike(f"%{query}%")
+                )
+            )
+        stmt_count = stmt_count.where(
+                or_(
+                    models.Workflow.name.ilike(f"%{query}%"), 
+                    models.Workflow.workflow.ilike(f"%{query}%")
+                )
+            )
+    
+    # add offset and limit
+    result = await session.execute(stmt_select.offset(offset).limit(limit))
+    
+    # get total count without offset and limit
+    count_query = await session.execute(stmt_count)
+    count: Optional[int] = count_query.scalar()
+    
+    # Note the use of .scalars() to get ScarlarResult, i.e. Pydantic model, instead of Row object
+    db_obj_list: Optional[List[model]] = result.scalars().all()
+    
+    return db_obj_list, count
 
 
 

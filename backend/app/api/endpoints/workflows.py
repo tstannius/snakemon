@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.encoders import jsonable_encoder
+from math import ceil
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import List, Optional
+from typing import Dict, List, Optional, Union
 
 from app.db import crud, models, schemas
 from app.api import dependencies as deps
@@ -10,12 +11,18 @@ router = APIRouter()
 
 
 
-@router.get("/", response_model=List[schemas.Workflow])
+@router.get("", response_model=Dict[str, Union[List[schemas.Workflow], int]])
 async def get_workflows(
             offset: Optional[int] = 0,
             limit: Optional[int] = 100,
+            query: Optional[str] = None,
             session: AsyncSession = Depends(deps.get_session)):
     """Get multiple workflows
+    
+    TODO:
+    - Add as parameters offset, limit, sorting, search string
+    - Server should handle slice
+    - Server must send back total page count.
 
     Args:
         offset (Optional[int], optional): Offset into database rows. Defaults to 0.
@@ -25,12 +32,16 @@ async def get_workflows(
     Returns:
         List[schemas.Workflow]: List of workflow entries
     """
-    workflows = await crud.read_multi_generic(session, 
-                                              models.Workflow, 
-                                              offset, 
-                                              limit, 
+    workflows, n_rows = await crud.read_multi_workflows(session=session,
+                                              model=models.Workflow, 
+                                              offset=offset, 
+                                              limit=limit,
+                                              query=query,
                                               descending=True)
-    return workflows
+    
+    page_count = ceil(n_rows / limit)
+    
+    return {"workflows": workflows, "page_count": page_count}
 
 
 
